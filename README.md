@@ -1,5 +1,6 @@
 # personality-teaching
 个性化教学系统
+```shell
 http://mama.indstate.edu/users/ice/Tree.html
 |-- README.md
 |-- Tree.html
@@ -21,3 +22,4 @@ http://mama.indstate.edu/users/ice/Tree.html
 `-- web
 
 14 directories, 4 files
+```
