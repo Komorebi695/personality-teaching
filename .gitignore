@@ -14,3 +14,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+*.idea
+go.work
+*.yaml
+go.mod
+go.sum
+*.log
