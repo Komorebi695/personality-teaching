@@ -4,21 +4,17 @@
 http://mama.indstate.edu/users/ice/Tree.html
 |-- README.md
 |-- Tree.html
-|-- assets
 |-- build
-|-- cmd
-| `-- main.go
-|-- deployments
 |-- docs
-|-- go.mod
-|-- internal
-| |-- configs
-| |-- controller
-| |-- dao
-| |-- logic
-| `-- model
 |-- log
-|-- utils
-`-- web
+`-- src
+    |-- cmd
+    |    `-- main.go
+    |-- configs
+    |-- controller
+    |-- dao
+    |-- logic
+    |-- model
+    `-- utils
 
 ```
