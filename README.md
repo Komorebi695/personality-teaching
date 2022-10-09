@@ -18,7 +18,7 @@ http://mama.indstate.edu/users/ice/Tree.html
 | |-- logic
 | `-- model
 |-- log
-|-- pkg
+|-- utils
 `-- web
 
 ```
