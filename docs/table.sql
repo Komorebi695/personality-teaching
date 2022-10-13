@@ -5,13 +5,12 @@ MySQL - 5.7.33 : Database - teach
 */
 
 /*!40101 SET NAMES utf8 */;
-
 /*!40101 SET SQL_MODE=''*/;
-
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
 CREATE DATABASE /*!32312 IF NOT EXISTS*/`teach` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
 
 USE `teach`;
@@ -19,6 +18,7 @@ USE `teach`;
 /*Table structure for table `t_class` */
 
 DROP TABLE IF EXISTS `t_class`;
+
 
 CREATE TABLE `t_class` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -33,6 +33,7 @@ CREATE TABLE `t_class` (
 /*Table structure for table `t_exam` */
 
 DROP TABLE IF EXISTS `t_exam`;
+
 
 CREATE TABLE `t_exam` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -49,6 +50,7 @@ CREATE TABLE `t_exam` (
 /*Table structure for table `t_knowledge_point` */
 
 DROP TABLE IF EXISTS `t_knowledge_point`;
+
 
 CREATE TABLE `t_knowledge_point` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -67,6 +69,7 @@ CREATE TABLE `t_knowledge_point` (
 
 DROP TABLE IF EXISTS `t_knowledge_point_question`;
 
+
 CREATE TABLE `t_knowledge_point_question` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `knp_id` varchar(64) NOT NULL COMMENT '知识点编号编号',
@@ -79,6 +82,7 @@ CREATE TABLE `t_knowledge_point_question` (
 /*Table structure for table `t_question` */
 
 DROP TABLE IF EXISTS `t_question`;
+
 
 CREATE TABLE `t_question` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -146,6 +150,7 @@ CREATE TABLE `t_student_question` (
 
 DROP TABLE IF EXISTS `t_teacher`;
 
+
 CREATE TABLE `t_teacher` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `teacher_id` varchar(64) NOT NULL COMMENT '教师编号',
@@ -162,6 +167,7 @@ CREATE TABLE `t_teacher` (
 /*Table structure for table `t_teacher_class` */
 
 DROP TABLE IF EXISTS `t_teacher_class`;
+
 
 CREATE TABLE `t_teacher_class` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

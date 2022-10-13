@@ -1,7 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"personality-teaching/src/configs"
+	"personality-teaching/src/dao"
+)
 
 func main() {
-	fmt.Println("hello,personality-teaching!")
+	// 初始化配置文件
+	config := configs.InitConfig()
+	if config == nil {
+		panic("配置文件加载错误!")
+	}
+
+	// 创建数据库连接
+	if err := dao.InitMysql(config); err != nil {
+		panic(err.Error())
+	}
+
+	r := gin.Default()
+
+	// 监听端口
+	addr := fmt.Sprintf(":" + config.Port)
+	_ = r.Run(addr)
 }
