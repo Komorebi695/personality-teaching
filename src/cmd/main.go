@@ -7,15 +7,17 @@ import (
 )
 
 func main() {
+	// 初始化配置文件
+	config := configs.InitConfig()
+
 	// 创建数据库连接
-	if err := dao.InitMysql(); err != nil {
+	if err := dao.InitMysql(config); err != nil {
 		panic(err.Error())
 	}
 
 	r := gin.Default()
 
 	// 监听端口
-	config := configs.InitConfig()
 	addr := ":" + config.Port
 	_ = r.Run(addr)
 }

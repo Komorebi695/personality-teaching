@@ -34,8 +34,8 @@ type Redis struct {
 }
 
 // InitConfig 初始化服务器配置
-func InitConfig() *AppConfig {
-	var config *AppConfig
+func InitConfig() AppConfig {
+	var config AppConfig
 	file, err := os.Open("./src/configs/config.yaml")
 	if err != nil {
 		panic(err.Error())
