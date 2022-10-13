@@ -13,7 +13,7 @@ import (
 
 var DB *gorm.DB
 
-func InitMysql(initConfig configs.AppConfig) (err error) {
+func InitMysql(initConfig *configs.AppConfig) (err error) {
 	database := initConfig.DataBase
 
 	// 日志设置

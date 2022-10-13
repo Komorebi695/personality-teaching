@@ -9,6 +9,9 @@ import (
 func main() {
 	// 初始化配置文件
 	config := configs.InitConfig()
+	if config == nil {
+		panic("配置文件加载错误!")
+	}
 
 	// 创建数据库连接
 	if err := dao.InitMysql(config); err != nil {
