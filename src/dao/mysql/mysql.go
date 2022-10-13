@@ -1,14 +1,16 @@
-package dao
+package mysql
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"fmt"
 	"log"
 	"os"
 	"personality-teaching/src/configs"
 	"time"
+
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -27,7 +29,12 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 		},
 	)
 
-	dsn := database.User + ":" + database.Pwd + "@tcp(" + database.Host + ":" + database.Port + ")/" + database.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		database.User,
+		database.Pwd,
+		database.Host,
+		database.Port,
+		database.Database)
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
