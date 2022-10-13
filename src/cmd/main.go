@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"personality-teaching/src/configs"
-	"personality-teaching/src/dao"
+	"personality-teaching/src/dao/mysql"
+	"personality-teaching/src/dao/redis"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -15,13 +17,16 @@ func main() {
 	}
 
 	// 创建数据库连接
-	if err := dao.InitMysql(config); err != nil {
-		panic(err.Error())
+	if err := mysql.InitMysql(config); err != nil {
+		panic("MySQL init error: " + err.Error())
 	}
 
+	if err := redis.InitRedis(config.Redis); err != nil {
+		panic("Redis init error: " + err.Error())
+	}
 	r := gin.Default()
 
 	// 监听端口
-	addr := fmt.Sprintf(":" + config.Port)
+	addr := fmt.Sprintf(":%s", config.Port)
 	_ = r.Run(addr)
 }
