@@ -17,6 +17,4 @@
 *.idea
 go.work
 *.yaml
-go.mod
-go.sum
 *.log
