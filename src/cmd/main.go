@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"personality-teaching/src/configs"
 	"personality-teaching/src/dao"
@@ -21,6 +22,6 @@ func main() {
 	r := gin.Default()
 
 	// 监听端口
-	addr := ":" + config.Port
+	addr := fmt.Sprintf(":" + config.Port)
 	_ = r.Run(addr)
 }
