@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// AppConfig 服务端配置
+// AppConfig 服务端配置（组合全部配置模型）
 type AppConfig struct {
 	AppName  string `yaml:"app_name"`
 	Port     string `yaml:"port"`
