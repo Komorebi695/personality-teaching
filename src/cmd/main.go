@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"personality-teaching/src/cmd/router"
 	"personality-teaching/src/configs"
 	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/dao/redis"
-
-	"github.com/gin-gonic/gin"
+	"syscall"
 )
 
 func main() {
@@ -24,9 +27,17 @@ func main() {
 	if err := redis.InitRedis(config.Redis); err != nil {
 		panic("Redis init error: " + err.Error())
 	}
-	r := gin.Default()
+	r := router.InitRouter()
+	go func() {
+		// 监听端口
+		addr := fmt.Sprintf(":%s", config.Port)
+		if err := r.Run(addr); err != nil {
+			log.Fatalf(" [ERROR] ServerRun:%s err:%v\n", addr, err)
+		}
+	}()
+	//quit持续监听信号（syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM）
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
 
-	// 监听端口
-	addr := fmt.Sprintf(":%s", config.Port)
-	_ = r.Run(addr)
 }
