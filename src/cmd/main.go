@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"personality-teaching/src/cmd/router"
 	"personality-teaching/src/configs"
 	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/dao/redis"
@@ -27,7 +26,7 @@ func main() {
 	if err := redis.InitRedis(config.Redis); err != nil {
 		panic("Redis init error: " + err.Error())
 	}
-	r := router.InitRouter()
+	r := InitRouter()
 	go func() {
 		// 监听端口
 		addr := fmt.Sprintf(":%s", config.Port)
