@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"personality-teaching/src/controller"
+	"personality-teaching/src/middleware"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
@@ -12,5 +14,15 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong",
 		})
 	})
+
+	//学生模块接口
+	studentGroup := router.Group("/student")
+	studentGroup.Use(
+		middleware.RecoveryMiddleware(),
+		middleware.TranslationMiddleware(),
+		middleware.RequestLog())
+	{
+		controller.StudentRegister(studentGroup)
+	}
 	return router
 }
