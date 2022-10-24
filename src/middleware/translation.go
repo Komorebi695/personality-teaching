@@ -12,7 +12,7 @@ import (
 	"reflect"
 )
 
-//设置Translation
+// TranslationMiddleware 设置Translation 输入参数合法性校验
 func TranslationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//参照：https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go

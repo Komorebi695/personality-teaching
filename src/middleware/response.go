@@ -23,6 +23,7 @@ const (
 	GROUPALL_SAVE_FLOWERROR ResponseCode = 2001
 )
 
+// Response 封装统一返回类
 type Response struct {
 	ErrorCode ResponseCode `json:"errno"`
 	ErrorMsg  string       `json:"errmsg"`
