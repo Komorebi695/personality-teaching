@@ -19,7 +19,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	studentGroup := router.Group("/student")
 	studentGroup.Use(
 		middleware.RecoveryMiddleware(),
-		middleware.TranslationMiddleware(),
 		middleware.RequestLog())
 	{
 		controller.StudentRegister(studentGroup)

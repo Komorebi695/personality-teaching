@@ -33,7 +33,7 @@ var studentService logic.StudentService
 func (student *StudentController) StudentList(c *gin.Context) {
 	//从上下文获取参数并校验
 	params := &model.StudentListInput{}
-	if err := params.BindValidParam(c); err != nil {
+	if err := c.ShouldBind(params); err != nil {
 		middleware.ResponseError(c, 3000, err)
 		return
 	}
@@ -56,7 +56,7 @@ func (student *StudentController) StudentList(c *gin.Context) {
 // @Router /student/student_delete [get]
 func (student *StudentController) StudentDelete(c *gin.Context) {
 	params := &model.StudentDeleteInput{}
-	if err := params.BindValidParam(c); err != nil {
+	if err := c.ShouldBind(params); err != nil {
 		middleware.ResponseError(c, 3000, err)
 		return
 	}
@@ -79,7 +79,7 @@ func (student *StudentController) StudentDelete(c *gin.Context) {
 // @Router /student/student_add [post]
 func (student *StudentController) StudentAdd(c *gin.Context) {
 	params := &model.StudentAddInput{}
-	if err := params.BindValidParam(c); err != nil {
+	if err := c.ShouldBind(params); err != nil {
 		middleware.ResponseError(c, 3000, err)
 		return
 	}
