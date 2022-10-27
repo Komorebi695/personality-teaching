@@ -8,10 +8,10 @@ type RespMsg struct {
 }
 
 // NewRespMsg : 生成response对象
-func NewRespMsg(code int, msg string, data interface{}) *RespMsg {
+func NewRespMsg(code int, data interface{}) *RespMsg {
 	return &RespMsg{
 		Code: code,
-		Msg:  msg,
+		Msg:  ResCode(code).StatusText(),
 		Data: data,
 	}
 }
