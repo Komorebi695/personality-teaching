@@ -8,6 +8,7 @@ import (
 	"personality-teaching/src/configs"
 	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/dao/redis"
+	"personality-teaching/src/logger"
 	"syscall"
 )
 
@@ -26,6 +27,8 @@ func main() {
 	if err := redis.InitRedis(config.Redis); err != nil {
 		panic("Redis init error: " + err.Error())
 	}
+
+	logger.InitLogger() //初始化日志
 	r := InitRouter()
 	go func() {
 		// 监听端口

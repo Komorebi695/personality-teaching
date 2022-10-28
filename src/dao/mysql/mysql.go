@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
+var db *gorm.DB
 
 func InitMysql(initConfig *configs.AppConfig) (err error) {
 	database := initConfig.DataBase
@@ -23,7 +23,7 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer（日志输出的目标，前缀和日志包含的内容）
 		logger.Config{
 			SlowThreshold:             time.Second, // 慢 SQL 阈值
-			LogLevel:                  logger.Warn, // 日志级别 Silent、Error、Warn、Info
+			LogLevel:                  logger.Info, // 日志级别 Silent、Error、Warn、Info
 			IgnoreRecordNotFoundError: true,        // 忽略ErrRecordNotFound（记录未找到）错误
 			Colorful:                  true,        // 彩色打印
 		},
@@ -35,7 +35,7 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 		database.Host,
 		database.Port,
 		database.Database)
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
@@ -43,7 +43,7 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 	}
 
 	// 迁移
-	err = DB.AutoMigrate()
+	err = db.AutoMigrate()
 	if err != nil {
 		return err
 	}
