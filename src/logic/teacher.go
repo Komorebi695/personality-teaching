@@ -47,3 +47,8 @@ func (t *TeacherService) StoreSession(username string) (string, error) {
 	}
 	return hashedStr, nil
 }
+
+// CheckPermission 检查session_key是否具有教师权限
+func CheckPermission(sessionKey string) (string, error) {
+	return redis.GetTeacherIX(sessionKey)
+}
