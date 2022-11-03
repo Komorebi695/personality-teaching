@@ -20,5 +20,24 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	preRouter.DELETE("/teacher/class", middle.VerifyTeacher, controller.DeleteClass)
 	preRouter.GET("/teacher/class", controller.ClassInfo)
 	preRouter.GET("/teacher/class/list", middle.VerifyTeacher, controller.ClassList)
+
+	//题目模块接口
+	questionGroup := router.Group("/question")
+	questionGroup.Use(middlewares...)
+	{
+		controller.QuestionRegister(questionGroup)
+	}
+	//题目分类模块接口
+	QuestionTypeGroup := router.Group("/type")
+	QuestionTypeGroup.Use(middlewares...)
+	{
+		controller.QuestionTypeRegister(QuestionTypeGroup)
+	}
+	//知识点模块接口
+	knowledgePointGroup := router.Group("/point")
+	knowledgePointGroup.Use(middlewares...)
+	{
+		controller.KnowledgePointRegister(knowledgePointGroup)
+	}
 	return router
 }
