@@ -96,9 +96,20 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 		return err
 	}
 	//包装题目信息
+	questionId := utils.GenSnowID()
+	//若是选择题，选项内容转为JSON插入
+	if params.Type == 1 {
+		//QuestionOptionList	JSON序列化
+		optionContext := utils.Obj2Json(params.QuestionOptionList)
+		//以生成的questionID后4位作为分隔符
+		splitNum := utils.SplitNum(questionId)
+		//context拼接
+		params.Context = params.Context + splitNum + optionContext
+	}
+
 	questionModel := &mysql.TQuestion{
 		//使用雪花ID生成
-		QuestionId: utils.GenSnowID(),
+		QuestionId: questionId,
 		Name:       params.QuestionName,
 		Level:      params.Level,
 		Type:       params.Type,
@@ -124,21 +135,6 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 			tx.Rollback()
 			logger.L.Error("`QuestionAddService` -> knowledgePointQuestion.Save err:", zap.Error(err))
 			return err
-		}
-	}
-	//若是选择题，插入选项表内容
-	if params.Type == 1 {
-		for _, option := range params.QuestionOptionList {
-			questionOption := &mysql.TQuestionOption{
-				QuestionId: questionModel.QuestionId,
-				Context:    option.Context,
-				IsAnswer:   option.IsAnswer,
-			}
-			if err = questionOption.Save(c, tx); err != nil {
-				tx.Rollback()
-				logger.L.Error("`QuestionAddService` -> TQuestionOption.Save err:", zap.Error(err))
-				return err
-			}
 		}
 	}
 	tx.Commit()
@@ -177,18 +173,18 @@ func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.Qu
 		knowledgePointList = append(knowledgePointList, pointSearch)
 	}
 	//若是选择题，查询选项表
-	var optionList []*mysql.TQuestionOption
-	if questionInfo.Type == 1 {
-		optionItem := &mysql.TQuestionOption{QuestionId: params.QuestionId}
-		optionList, err = optionItem.FindByQuestionId(c, tx)
-		if err != nil && err != gorm.ErrRecordNotFound {
-			logger.L.Error("`QuestionDetailService` -> TQuestionOption.FindById err:", zap.Error(err))
-			return nil, err
-		}
-	}
+	//var optionList []*mysql.TQuestionOption
+	//if questionInfo.Type == 1 {
+	//	optionItem := &mysql.TQuestionOption{QuestionId: params.QuestionId}
+	//	optionList, err = optionItem.FindByQuestionId(c, tx)
+	//	if err != nil && err != gorm.ErrRecordNotFound {
+	//		logger.L.Error("`QuestionDetailService` -> TQuestionOption.FindById err:", zap.Error(err))
+	//		return nil, err
+	//	}
+	//}
 	detail := &mysql.QuestionDetail{
-		QuestionInfo:               questionInfo,
-		QuestionOption:             optionList,
+		QuestionInfo: questionInfo,
+		//QuestionOption:             optionList,
 		KnowledgePointQuestionList: questionPointList,
 		KnowledgePointList:         knowledgePointList,
 	}
@@ -250,26 +246,26 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	}
 	//若是选择题，修改选项表内容
 	if params.Type == 1 {
-		//删除关联
-		oldQuestionOption := &mysql.TQuestionOption{QuestionId: params.QuestionId}
-		if err = oldQuestionOption.DeleteById(c, tx); err != nil {
-			tx.Rollback()
-			logger.L.Error("`QuestionUpdateService` -> oldQuestionOption.Delete err:", zap.Error(err))
-			return err
-		}
-		//重新插入
-		for _, option := range params.Option {
-			questionOption := &mysql.TQuestionOption{
-				QuestionId: questionInfo.QuestionId,
-				Context:    option.Context,
-				IsAnswer:   option.IsAnswer,
-			}
-			if err = questionOption.Save(c, tx); err != nil {
-				tx.Rollback()
-				logger.L.Error("`QuestionAddService` -> TQuestionOption.Save err:", zap.Error(err))
-				return err
-			}
-		}
+		////删除关联
+		//oldQuestionOption := &mysql.TQuestionOption{QuestionId: params.QuestionId}
+		//if err = oldQuestionOption.DeleteById(c, tx); err != nil {
+		//	tx.Rollback()
+		//	logger.L.Error("`QuestionUpdateService` -> oldQuestionOption.Delete err:", zap.Error(err))
+		//	return err
+		//}
+		////重新插入
+		//for _, option := range params.Option {
+		//	questionOption := &mysql.TQuestionOption{
+		//		QuestionId: questionInfo.QuestionId,
+		//		Context:    option.Context,
+		//		IsAnswer:   option.IsAnswer,
+		//	}
+		//	if err = questionOption.Save(c, tx); err != nil {
+		//		tx.Rollback()
+		//		logger.L.Error("`QuestionAddService` -> TQuestionOption.Save err:", zap.Error(err))
+		//		return err
+		//	}
+		//}
 	}
 	tx.Commit()
 	return nil

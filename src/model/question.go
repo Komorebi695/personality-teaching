@@ -42,6 +42,7 @@ type QuestionAddInput struct {
 	KnpId              string                   `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号，以逗号分隔"`
 }
 
+// GetKnpIdByModel 知识点拆分
 func (t *QuestionAddInput) GetKnpIdByModel() []string {
 	return strings.Split(t.KnpId, ",")
 }
@@ -52,15 +53,15 @@ type QuestionDetailInput struct {
 
 // QuestionUpdateInput 题目修改输入
 type QuestionUpdateInput struct {
-	QuestionId   string                   `json:"question_id" form:"question_id" comment:"问题id" binding:"required"`
-	QuestionName string                   `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
-	Context      string                   `json:"context" form:"context" comment:"题目内容"`
-	Option       []QuestionOptionAddInput `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
-	Answer       string                   `json:"answer" form:"answer" comment:"题目答案"`
-	Type         int                      `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
-	Level        int                      `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
-	CreateUser   string                   `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
-	KnpId        string                   `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号,以逗号分隔"`
+	QuestionId   string `json:"question_id" form:"question_id" comment:"问题id" binding:"required"`
+	QuestionName string `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
+	Context      string `json:"context" form:"context" comment:"题目内容"`
+	//Option       []QuestionOptionAddInput `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
+	Answer     string `json:"answer" form:"answer" comment:"题目答案"`
+	Type       int    `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
+	Level      int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
+	CreateUser string `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
+	KnpId      string `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号,以逗号分隔"`
 }
 
 func (t *QuestionUpdateInput) GetKnpIdByModel() []string {
@@ -76,6 +77,5 @@ type QuestionOptionOutput struct {
 
 // QuestionOptionAddInput 选项添加输入
 type QuestionOptionAddInput struct {
-	Context  string `json:"context" form:"context" comment:"选项内容" binding:"required"`
-	IsAnswer int8   `json:"is_answer" form:"is_answer" comment:"是否为正确答案，0：否，1：是" binding:"required"`
+	Context string `json:"Context" form:"Context" comment:"选项内容" binding:"required"`
 }

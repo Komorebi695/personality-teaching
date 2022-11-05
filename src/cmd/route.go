@@ -27,12 +27,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	{
 		controller.QuestionRegister(questionGroup)
 	}
-	//题目分类模块接口
-	QuestionTypeGroup := router.Group("/type")
-	QuestionTypeGroup.Use(middlewares...)
-	{
-		controller.QuestionTypeRegister(QuestionTypeGroup)
-	}
 	//知识点模块接口
 	knowledgePointGroup := router.Group("/point")
 	knowledgePointGroup.Use(middlewares...)
