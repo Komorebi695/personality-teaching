@@ -1,6 +1,8 @@
 package model
 
-import "strings"
+import (
+	"strings"
+)
 
 // QuestionListInput 题目列表输入
 type QuestionListInput struct {
@@ -17,13 +19,14 @@ type QuestionListOutput struct {
 
 // QuestionListItemOutput 题目列表输出的主体
 type QuestionListItemOutput struct {
-	QuestionId   string `json:"question_id" form:"question_id" comment:"question_id"`
-	Type         int    `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题"`
-	Level        int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
-	QuestionName string `json:"question_name" form:"question_name" comment:"题目名称,即题目主体"`
-	Context      string `json:"context" form:"context" comment:"题目内容，存放题目中除了题干文字之外的内容，如图片地址"`
-	Answer       string `json:"answer" form:"answer" comment:"题目答案"`
-	CreateUser   string `json:"create_user" form:"create_user" comment:"录入者"`
+	QuestionId   string            `json:"question_id" form:"question_id" comment:"question_id"`
+	Type         int               `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题"`
+	Level        int               `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
+	QuestionName string            `json:"question_name" form:"question_name" comment:"题目名称,即题目主体"`
+	Context      string            `json:"context" form:"context" comment:"题目内容，存放题目中除了题干文字之外的内容，如图片地址"`
+	Option       []*QuestionOption `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
+	Answer       string            `json:"answer" form:"answer" comment:"题目答案"`
+	CreateUser   string            `json:"create_user" form:"create_user" comment:"录入者"`
 }
 
 type QuestionDeleteInput struct {
@@ -32,14 +35,14 @@ type QuestionDeleteInput struct {
 
 // QuestionAddInput 问题添加输入
 type QuestionAddInput struct {
-	QuestionName       string                   `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
-	Context            string                   `json:"context" form:"context" comment:"题目内容"`
-	Answer             string                   `json:"answer" form:"answer" comment:"题目答案"`
-	Type               int                      `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
-	Level              int                      `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
-	CreateUser         string                   `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
-	QuestionOptionList []QuestionOptionAddInput `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
-	KnpId              string                   `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号，以逗号分隔"`
+	QuestionName       string            `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
+	Context            string            `json:"context" form:"context" comment:"题目内容"`
+	Answer             string            `json:"answer" form:"answer" comment:"题目答案"`
+	Type               int               `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
+	Level              int               `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
+	CreateUser         string            `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
+	QuestionOptionList []*QuestionOption `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
+	KnpId              string            `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号，以逗号分隔"`
 }
 
 // GetKnpIdByModel 知识点拆分
@@ -53,15 +56,15 @@ type QuestionDetailInput struct {
 
 // QuestionUpdateInput 题目修改输入
 type QuestionUpdateInput struct {
-	QuestionId   string `json:"question_id" form:"question_id" comment:"问题id" binding:"required"`
-	QuestionName string `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
-	Context      string `json:"context" form:"context" comment:"题目内容"`
-	//Option       []QuestionOptionAddInput `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
-	Answer     string `json:"answer" form:"answer" comment:"题目答案"`
-	Type       int    `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
-	Level      int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
-	CreateUser string `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
-	KnpId      string `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号,以逗号分隔"`
+	QuestionId   string            `json:"question_id" form:"question_id" comment:"问题id" binding:"required"`
+	QuestionName string            `json:"question_name" form:"question_name" comment:"题目名称" binding:"required"`
+	Context      string            `json:"context" form:"context" comment:"题目内容"`
+	Option       []*QuestionOption `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
+	Answer       string            `json:"answer" form:"answer" comment:"题目答案"`
+	Type         int               `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题" binding:"required"`
+	Level        int               `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难" binding:"required"`
+	CreateUser   string            `json:"create_user" form:"create_user" comment:"录入者" binding:"required"`
+	KnpId        string            `json:"knp_id" form:"column:knp_id" comment:"上级知识点编号,以逗号分隔"`
 }
 
 func (t *QuestionUpdateInput) GetKnpIdByModel() []string {
@@ -75,7 +78,7 @@ type QuestionOptionOutput struct {
 	IsAnswer int8   `json:"is_answer" form:"is_answer" comment:"是否为正确答案，0：否，1：是"`
 }
 
-// QuestionOptionAddInput 选项添加输入
-type QuestionOptionAddInput struct {
+// QuestionOption 选项添加输入
+type QuestionOption struct {
 	Context string `json:"Context" form:"Context" comment:"选项内容" binding:"required"`
 }

@@ -67,9 +67,9 @@ func (q *KnowledgePointService) KnowledgePointDeleteService(c *gin.Context, para
 	}
 	//读取基本信息
 	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: params.KnpId}
-	knowledgePointInfo, err = knowledgePointInfo.FindById(c, tx)
+	knowledgePointInfo, err = knowledgePointInfo.FindOneById(c, tx)
 	if err != nil {
-		logger.L.Error("`KnowledgePointDeleteService` -> TKnowledgePoint.FindById err:", zap.Error(err))
+		logger.L.Error("`KnowledgePointDeleteService` -> TKnowledgePoint.FindOneById err:", zap.Error(err))
 		return err
 	}
 	err = knowledgePointInfo.Delete(c, tx)
@@ -127,9 +127,9 @@ func (q *KnowledgePointService) KnowledgePointDetailService(c *gin.Context, para
 	}
 	//获取知识点详情
 	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: params.KnpId}
-	knowledgePointInfo, err = knowledgePointInfo.FindById(c, tx)
+	knowledgePointInfo, err = knowledgePointInfo.FindOneById(c, tx)
 	if err != nil {
-		logger.L.Error("`KnowledgePointDetailService` -> knowledgePointInfo.FindById err:", zap.Error(err))
+		logger.L.Error("`KnowledgePointDetailService` -> knowledgePointInfo.FindOneById err:", zap.Error(err))
 		return nil, err
 	}
 	return knowledgePointInfo, nil
@@ -145,7 +145,7 @@ func (q *KnowledgePointService) KnowledgePointUpdateService(c *gin.Context, para
 	tx = tx.Begin()
 	//获取知识点详情
 	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: params.KnpId}
-	knowledgePointInfo, err = knowledgePointInfo.FindById(c, tx)
+	knowledgePointInfo, err = knowledgePointInfo.FindOneById(c, tx)
 	if err != nil {
 		tx.Rollback()
 		logger.L.Error("`KnowledgePointUpdateService` -> The knowledgePoint does not exist err:", zap.Error(err))

@@ -23,9 +23,9 @@ func (t *TKnowledgePoint) TableName() string {
 	return "t_knowledge_point"
 }
 
-func (t *TKnowledgePoint) FindById(c *gin.Context, tx *gorm.DB) (*TKnowledgePoint, error) {
+func (t *TKnowledgePoint) FindOneById(c *gin.Context, tx *gorm.DB) (*TKnowledgePoint, error) {
 	point := &TKnowledgePoint{}
-	err := tx.WithContext(c).Where("knp_id = ?", t.KnpId).Find(point).Error
+	err := tx.WithContext(c).Where("knp_id = ?", t.KnpId).First(point).Error
 	return point, err
 }
 

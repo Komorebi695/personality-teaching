@@ -25,7 +25,7 @@ func (t *TQuestion) TableName() string {
 	return "t_question"
 }
 
-func (t *TQuestion) Find(c *gin.Context, tx *gorm.DB) (*TQuestion, error) {
+func (t *TQuestion) FindOnce(c *gin.Context, tx *gorm.DB) (*TQuestion, error) {
 	out := &TQuestion{}
 	err := tx.WithContext(c).Where("question_id = ?", t.QuestionId).Or("name = ?", t.Name).First(out).Error
 	if err != nil {
@@ -53,7 +53,7 @@ func (t *TQuestion) PageList(c *gin.Context, tx *gorm.DB, param *model.QuestionL
 		query = query.Where("(name like ?)", "%"+param.Info+"%")
 	}
 
-	if err := query.Limit(param.PageSize).Offset(offset).Order("id desc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
+	if err := query.Limit(param.PageSize).Offset(offset).Order("id asc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0, err
 	}
 	query.Limit(param.PageSize).Offset(offset).Count(&total)

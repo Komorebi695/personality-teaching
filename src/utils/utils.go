@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"personality-teaching/src/logger"
+	"strings"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -46,6 +47,12 @@ func CompareHash(hashedStr string, str string) (bool, error) {
 // SplitNum 截取questionId作为选项与题目的分隔字段
 func SplitNum(s string) string {
 	return s[low:high]
+}
+
+// SplitContext 根据题目的分隔字段 分离题干和选项
+func SplitContext(id, s string) []string {
+	splitNum := SplitNum(id)
+	return strings.Split(s, splitNum)
 }
 
 // Obj2Json JSON转换

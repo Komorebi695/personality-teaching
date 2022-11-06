@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -11,6 +12,8 @@ import (
 	"time"
 )
 
+const SingleChoiceQuestion = 1
+
 type QuestionService struct{}
 
 type questionFunc interface {
@@ -18,6 +21,7 @@ type questionFunc interface {
 	QuestionDeleteService(c *gin.Context, params *model.QuestionDeleteInput) error
 	QuestionAddService(c *gin.Context, params *model.QuestionAddInput) error
 	QuestionDetailService(c *gin.Context, params *model.QuestionDetailInput) (*mysql.QuestionDetail, error)
+	QuestionUpdateService(c *gin.Context, params *model.QuestionUpdateInput) error
 }
 
 var _ questionFunc = &QuestionService{}
@@ -42,10 +46,24 @@ func (q *QuestionService) QuestionListService(c *gin.Context, params *model.Ques
 	//格式化输出信息
 	var outList []model.QuestionListItemOutput
 	for _, listItem := range list {
+		var optionList []*model.QuestionOption
+		if listItem.Type == SingleChoiceQuestion {
+			contextSlice := utils.SplitContext(listItem.QuestionId, listItem.Context)
+			// 题干：contextSlice[0]	选项表JSON：contextSlice[1]
+			listItem.Context = contextSlice[0]
+			if len(contextSlice) == 2 {
+				err = json.Unmarshal([]byte(contextSlice[1]), &optionList)
+				if err != nil {
+					logger.L.Error("`QuestionListService` -> json.Unmarshal err:", zap.Error(err))
+					return nil, err
+				}
+			}
+		}
 		outItem := model.QuestionListItemOutput{
 			QuestionId:   listItem.QuestionId,
 			QuestionName: listItem.Name,
 			Context:      listItem.Context,
+			Option:       optionList,
 			Answer:       listItem.Answer,
 			Type:         listItem.Type,
 			Level:        listItem.Level,
@@ -68,9 +86,9 @@ func (q *QuestionService) QuestionDeleteService(c *gin.Context, params *model.Qu
 	}
 	//读取基本信息
 	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.Find(c, tx)
+	questionInfo, err = questionInfo.FindOnce(c, tx)
 	if err != nil {
-		logger.L.Error("`QuestionDeleteService` -> TQuestion.FindById err:", zap.Error(err))
+		logger.L.Error("`QuestionDeleteService` -> TQuestion.FindOneById err:", zap.Error(err))
 		return err
 	}
 	questionInfo.IsDelete = 1
@@ -90,7 +108,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	tx = tx.Begin()
 	//判断题目是否重复插入
 	questionInfo := &mysql.TQuestion{Name: params.QuestionName}
-	if _, err = questionInfo.Find(c, tx); err == nil {
+	if _, err = questionInfo.FindOnce(c, tx); err == nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionAddService` -> The problem's name already exists:", zap.Error(err))
 		return err
@@ -98,7 +116,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	//包装题目信息
 	questionId := utils.GenSnowID()
 	//若是选择题，选项内容转为JSON插入
-	if params.Type == 1 {
+	if params.Type == SingleChoiceQuestion {
 		//QuestionOptionList	JSON序列化
 		optionContext := utils.Obj2Json(params.QuestionOptionList)
 		//以生成的questionID后4位作为分隔符
@@ -149,42 +167,48 @@ func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.Qu
 	}
 	//获取问题详情
 	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.Find(c, tx)
+	questionInfo, err = questionInfo.FindOnce(c, tx)
 	if err != nil {
-		logger.L.Error("`QuestionDetailService` -> questionInfo.FindById err:", zap.Error(err))
+		logger.L.Error("`QuestionDetailService` -> questionInfo.FindOneById err:", zap.Error(err))
 		return nil, err
 	}
 	//题目对应的知识点编号表
 	questionPointSearch := &mysql.TKnowledgePointQuestion{QuestionId: questionInfo.QuestionId}
 	questionPointList, err := questionPointSearch.Find(c, tx, questionPointSearch)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		logger.L.Error("`QuestionDetailService` -> TKnowledgePointQuestion.FindById err:", zap.Error(err))
+		logger.L.Error("`QuestionDetailService` -> TKnowledgePointQuestion.FindOneById err:", zap.Error(err))
 		return nil, err
 	}
 	//根据编号表查询知识点列表
 	var knowledgePointList []*mysql.TKnowledgePoint
 	for _, point := range questionPointList {
 		pointSearch := &mysql.TKnowledgePoint{KnpId: point.KnpId}
-		pointSearch, err = pointSearch.FindById(c, tx)
+		pointSearch, err = pointSearch.FindOneById(c, tx)
 		if err != nil && err != gorm.ErrRecordNotFound {
-			logger.L.Error("`QuestionDetailService` -> TKnowledgePoint.FindById err:", zap.Error(err))
+			logger.L.Error("`QuestionDetailService` -> TKnowledgePoint.FindOneById err:", zap.Error(err))
 			return nil, err
 		}
 		knowledgePointList = append(knowledgePointList, pointSearch)
 	}
-	//若是选择题，查询选项表
-	//var optionList []*mysql.TQuestionOption
-	//if questionInfo.Type == 1 {
-	//	optionItem := &mysql.TQuestionOption{QuestionId: params.QuestionId}
-	//	optionList, err = optionItem.FindByQuestionId(c, tx)
-	//	if err != nil && err != gorm.ErrRecordNotFound {
-	//		logger.L.Error("`QuestionDetailService` -> TQuestionOption.FindById err:", zap.Error(err))
-	//		return nil, err
-	//	}
-	//}
+	//若类型是选择题，获取选项结构体
+	var optionList []*model.QuestionOption
+	if questionInfo.Type == SingleChoiceQuestion {
+		contextSlice := utils.SplitContext(questionInfo.QuestionId, questionInfo.Context)
+		// 题干：contextSlice[0]	选项表JSON：contextSlice[1]
+		questionInfo.Context = contextSlice[0]
+		if len(contextSlice) == 2 {
+			err = json.Unmarshal([]byte(contextSlice[1]), &optionList)
+			if err != nil {
+				logger.L.Error("`QuestionDetailService` -> json.Unmarshal err:", zap.Error(err))
+				return nil, err
+			}
+		}
+
+	}
+
 	detail := &mysql.QuestionDetail{
-		QuestionInfo: questionInfo,
-		//QuestionOption:             optionList,
+		QuestionInfo:               questionInfo,
+		QuestionOption:             optionList,
 		KnowledgePointQuestionList: questionPointList,
 		KnowledgePointList:         knowledgePointList,
 	}
@@ -200,7 +224,7 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	tx = tx.Begin()
 	//获取问题详情
 	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.Find(c, tx)
+	questionInfo, err = questionInfo.FindOnce(c, tx)
 	if err != nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionUpdateService` -> The problem does not exist err:", zap.Error(err))
@@ -212,8 +236,17 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 		logger.L.Error("`QuestionUpdateService` -> questionInfo.QuestionDetail err:", zap.Error(err))
 		return err
 	}
-	//修改题目信息
 	info := questionDetail.QuestionInfo
+	//判断题目类型是否为选择题
+	if params.Type == SingleChoiceQuestion {
+		//QuestionOptionList	JSON序列化
+		optionContext := utils.Obj2Json(params.Option)
+		//以生成的questionID后4位作为分隔符
+		splitNum := utils.SplitNum(info.QuestionId)
+		//context拼接
+		params.Context = params.Context + splitNum + optionContext
+	}
+	//修改题目信息
 	info.Name = params.QuestionName
 	info.Context = params.Context
 	info.Level = params.Level
@@ -226,6 +259,7 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 		logger.L.Error("`QuestionUpdateService` -> TQuestion.add err:", zap.Error(err))
 		return err
 	}
+
 	//修改问题对应知识点编号
 	//删除关联
 	oldKnowledgeQuestion := &mysql.TKnowledgePointQuestion{QuestionId: params.QuestionId}
@@ -244,29 +278,7 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 			return err
 		}
 	}
-	//若是选择题，修改选项表内容
-	if params.Type == 1 {
-		////删除关联
-		//oldQuestionOption := &mysql.TQuestionOption{QuestionId: params.QuestionId}
-		//if err = oldQuestionOption.DeleteById(c, tx); err != nil {
-		//	tx.Rollback()
-		//	logger.L.Error("`QuestionUpdateService` -> oldQuestionOption.Delete err:", zap.Error(err))
-		//	return err
-		//}
-		////重新插入
-		//for _, option := range params.Option {
-		//	questionOption := &mysql.TQuestionOption{
-		//		QuestionId: questionInfo.QuestionId,
-		//		Context:    option.Context,
-		//		IsAnswer:   option.IsAnswer,
-		//	}
-		//	if err = questionOption.Save(c, tx); err != nil {
-		//		tx.Rollback()
-		//		logger.L.Error("`QuestionAddService` -> TQuestionOption.Save err:", zap.Error(err))
-		//		return err
-		//	}
-		//}
-	}
+
 	tx.Commit()
 	return nil
 }
