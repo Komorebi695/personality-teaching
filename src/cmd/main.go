@@ -28,7 +28,10 @@ func main() {
 		panic("Redis init error: " + err.Error())
 	}
 
-	logger.InitLogger() //初始化日志
+	//初始化日志
+	logger.InitLogger()
+
+	// 路由
 	r := InitRouter()
 	go func() {
 		// 监听端口
