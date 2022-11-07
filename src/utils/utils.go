@@ -2,6 +2,7 @@ package utils
 
 import (
 	"personality-teaching/src/logger"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -38,4 +39,9 @@ func CompareHash(hashedStr string, str string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// CurrentTime 获取当前时间 格式化：2006-01-02 15:01:05
+func CurrentTime() string {
+	return time.Now().Format("2006-01-02 15:01:05")
 }

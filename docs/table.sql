@@ -73,7 +73,7 @@ DROP TABLE IF EXISTS `t_knowledge_point_question`;
 CREATE TABLE `t_knowledge_point_question` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `knp_id` varchar(64) NOT NULL COMMENT '知识点编号编号',
-  `quesion_id` varchar(64) NOT NULL COMMENT '题⽬编号',
+  `question_id` varchar(64) NOT NULL COMMENT '题⽬编号',
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
@@ -127,6 +127,8 @@ CREATE TABLE `t_student_exam` (
   `student_id` varchar(64) NOT NULL COMMENT '学⽣编号',
   `answers` text NOT NULL COMMENT '答案, 序列化字符串',
   `comment` varchar(255) NOT NULL COMMENT '备注',
+  `start_time` DATETIME NOT NULL   COMMENT '考试开始时间',
+  `end_time` DATETIME NOT NULL   COMMENT '考试结束时间',
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
@@ -138,7 +140,7 @@ DROP TABLE IF EXISTS `t_student_question`;
 
 CREATE TABLE `t_student_question` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `quesion_id` varchar(64) NOT NULL COMMENT '题⽬编号',
+  `question_id` varchar(64) NOT NULL COMMENT '题⽬编号',
   `student_id` varchar(64) NOT NULL COMMENT '学⽣编号',
   `answer` text NOT NULL COMMENT '答案, 序列化字符串',
   `update_time` datetime NOT NULL COMMENT '修改时间',

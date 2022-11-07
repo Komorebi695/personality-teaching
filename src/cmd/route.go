@@ -10,15 +10,26 @@ import (
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router := gin.Default()
 	router.Use(middlewares...)
-	preRouter := router.Group("") //项目前缀，先空着
+	// 这个可以这样-> "/项目前缀/login"
+	router.POST("/login", controller.TeacherLogin)
 
-	preRouter.POST("/teacher/login", controller.TeacherLogin)
+	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
+	teacherRouter := router.Group("/teacher")
+	{
+		//  班级管理
+		teacherRouter.POST("/class", middle.VerifyTeacher, controller.AddClass)
+		teacherRouter.PUT("/class", middle.VerifyTeacher, controller.UpdateClass)
+		teacherRouter.DELETE("/class", middle.VerifyTeacher, controller.DeleteClass)
+		teacherRouter.GET("/class", controller.ClassInfo)
+		teacherRouter.GET("/class/list", middle.VerifyTeacher, controller.ClassList)
+		// 试卷管理
+		teacherRouter.POST("/exam", controller.AddExam)
+		teacherRouter.PUT("/exam", controller.UpdateExam)
+		teacherRouter.DELETE("/exam", controller.DeleteExam)
+		teacherRouter.GET("/exam", controller.ExamInfo)
+		teacherRouter.GET("/exam/list", controller.ExamList)
+		teacherRouter.POST("/exam/send/:id", controller.SendExam)
+	}
 
-	//  班级管理
-	preRouter.POST("/teacher/class", middle.VerifyTeacher, controller.AddClass)
-	preRouter.PUT("/teacher/class", middle.VerifyTeacher, controller.UpdateClass)
-	preRouter.DELETE("/teacher/class", middle.VerifyTeacher, controller.DeleteClass)
-	preRouter.GET("/teacher/class", controller.ClassInfo)
-	preRouter.GET("/teacher/class/list", middle.VerifyTeacher, controller.ClassList)
 	return router
 }
