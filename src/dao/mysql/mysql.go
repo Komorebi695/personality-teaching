@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -49,4 +50,11 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 	}
 
 	return err
+}
+func GetGormPool() (*gorm.DB, error) {
+	if db != nil {
+		return db, nil
+	} else {
+		return nil, errors.New("get pool error")
+	}
 }
