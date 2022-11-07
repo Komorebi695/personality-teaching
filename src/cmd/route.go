@@ -32,5 +32,17 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.POST("/exam/send/:id", controller.SendExam)
 	}
 
+	//题目模块接口
+	questionGroup := router.Group("/question")
+	questionGroup.Use(middlewares...)
+	{
+		controller.QuestionRegister(questionGroup)
+	}
+	//知识点模块接口
+	knowledgePointGroup := router.Group("/point")
+	knowledgePointGroup.Use(middlewares...)
+	{
+		controller.KnowledgePointRegister(knowledgePointGroup)
+	}
 	return router
 }
