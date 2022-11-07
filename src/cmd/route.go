@@ -15,13 +15,14 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	teacherRouter := router.Group("/teacher")
+	teacherRouter.Use(middle.VerifyTeacher)
 	{
 		//  班级管理
-		teacherRouter.POST("/class", middle.VerifyTeacher, controller.AddClass)
-		teacherRouter.PUT("/class", middle.VerifyTeacher, controller.UpdateClass)
-		teacherRouter.DELETE("/class", middle.VerifyTeacher, controller.DeleteClass)
+		teacherRouter.POST("/class", controller.AddClass)
+		teacherRouter.PUT("/class", controller.UpdateClass)
+		teacherRouter.DELETE("/class", controller.DeleteClass)
 		teacherRouter.GET("/class", controller.ClassInfo)
-		teacherRouter.GET("/class/list", middle.VerifyTeacher, controller.ClassList)
+		teacherRouter.GET("/class/list", controller.ClassList)
 		// 试卷管理
 		teacherRouter.POST("/exam", controller.AddExam)
 		teacherRouter.PUT("/exam", controller.UpdateExam)
