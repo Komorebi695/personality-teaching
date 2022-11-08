@@ -37,6 +37,6 @@ func TeacherLogin(c *gin.Context) {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		return
 	}
-	c.SetCookie(middle.SessionKey, sessionKey, 0, "", "", false, true)
+	c.SetCookie(middle.SessionKey, sessionKey, 0, "", "", false, false)
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
