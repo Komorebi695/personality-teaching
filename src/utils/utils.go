@@ -2,11 +2,13 @@ package utils
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 	"personality-teaching/src/logger"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/bwmarrin/snowflake"
 )
@@ -19,6 +21,11 @@ const high int64 = 18  // 切片截取上限
 func GenSnowID() string {
 	node, _ := snowflake.NewNode(nodeID)
 	return node.Generate().String()
+}
+
+// GetUUID 生成uuid
+func GetUUID() string {
+	return uuid.New().String()
 }
 
 // Encryption 将传入的字符串进行hash加密
