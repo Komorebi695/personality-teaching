@@ -32,7 +32,9 @@ var questionService = logic.NewQuestionService()
 // @ID /question/question_list
 // @Accept  json
 // @Produce  json
-// @Param info query string false "题目关键词"
+// @Param context query string false "题目关键词"
+// @Param type query int true "题目类型"
+// @Param level query int true "困难程度"
 // @Param page_size query int true "每页个数"
 // @Param page_no query int true "当前页数"
 // @Success 200 {object} code.RespMsg{data=model.QuestionListOutput} "success"

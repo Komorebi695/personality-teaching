@@ -49,8 +49,14 @@ func (t *TQuestion) PageList(c *gin.Context, tx *gorm.DB, param *model.QuestionL
 	offset := (param.PageNo - 1) * param.PageSize
 
 	query := tx.WithContext(c).Table(t.TableName()).Where("is_delete = 0")
-	if param.Info != "" {
-		query = query.Where("(name like ?)", "%"+param.Info+"%")
+	if param.Context != "" {
+		query = query.Where("(context like ?)", "%"+param.Context+"%")
+	}
+	if param.Type != 0 {
+		query = query.Where("(type = ?)", param.Type)
+	}
+	if param.Level != 0 {
+		query = query.Where("(level = ?)", param.Level)
 	}
 
 	if err := query.Limit(param.PageSize).Offset(offset).Order("id asc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
