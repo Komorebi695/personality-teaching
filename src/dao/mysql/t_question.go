@@ -59,10 +59,10 @@ func (t *TQuestion) PageList(c *gin.Context, tx *gorm.DB, param *model.QuestionL
 		query = query.Where("(level = ?)", param.Level)
 	}
 
+	query.Limit(param.PageSize).Offset(-1).Count(&total)
 	if err := query.Limit(param.PageSize).Offset(offset).Order("id asc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0, err
 	}
-	query.Limit(param.PageSize).Offset(offset).Count(&total)
 	return list, total, nil
 }
 
