@@ -17,3 +17,9 @@ type TeacherLoginReq struct {
 	UserName string `binding:"required,min=1,max=20" form:"username"`
 	Password string `binding:"required,min=1,max=20" form:"password"`
 }
+
+type SessionValue struct {
+	UserID     string `json:"user_id"`
+	RoleType   int8   `json:"role_type"`
+	CreateTime int64  `json:"create_time"`
+}

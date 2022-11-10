@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"personality-teaching/src/logger"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
@@ -19,6 +21,11 @@ const high int64 = 18  // 切片截取上限
 func GenSnowID() string {
 	node, _ := snowflake.NewNode(nodeID)
 	return node.Generate().String()
+}
+
+// GetUUID 生成uuid
+func GetUUID() string {
+	return uuid.New().String()
 }
 
 // Encryption 将传入的字符串进行hash加密
@@ -42,6 +49,11 @@ func CompareHash(hashedStr string, str string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// CurrentTime 获取当前时间 格式化：2006-01-02 15:01:05
+func CurrentTime() string {
+	return time.Now().Format("2006-01-02 15:01:05")
 }
 
 // SplitNum 截取questionId作为选项与题目的分隔字段
