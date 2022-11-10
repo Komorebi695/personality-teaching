@@ -1,27 +1,26 @@
 package redis
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
 )
 
-const teacherIDPre = "teacher"
+//Key: session ID，UUID随机串，前端cookie保存。
+//Value: json结构体序列化存储，结构体中包含如下字段
+//◦ UserID: ⽤⼾ID
+//◦ RoleType: 学⽣/教师
+//◦ CreateTime: 创建时间(时间戳)
 
-// session_key在Redis中value为string 类型：
-//key --> teacher:{hashed Teacher ID}   value --> {teacherId}
-func getTeacherKey(hashedTeacherID string) string {
-	return fmt.Sprintf("%s:%s", teacherIDPre, hashedTeacherID)
+const expireTime = time.Hour * 24 * 7
+
+func SetSessionNX(key string, value interface{}) error {
+	return redisDB.SetNX(key, value, expireTime).Err()
 }
 
-func SetSessionNX(teacherID string, value interface{}) error {
-	return redisDB.SetNX(getTeacherKey(teacherID), value, time.Hour*240).Err()
-}
-
-// GetTeacherIX 存在key返回value值，不存在返回空字符串
-func GetTeacherIX(sessionKey string) (string, error) {
-	val, err := redisDB.Get(getTeacherKey(sessionKey)).Result()
+// GetSessionValue 存在key返回value值，不存在返回空字符串
+func GetSessionValue(sessionKey string) (string, error) {
+	val, err := redisDB.Get(sessionKey).Result()
 	if err == redis.Nil {
 		return "", nil
 	}
@@ -29,4 +28,8 @@ func GetTeacherIX(sessionKey string) (string, error) {
 		return "", err
 	}
 	return val, nil
+}
+
+func ResetExpireTime(key string) error {
+	return redisDB.Expire(key, expireTime).Err()
 }
