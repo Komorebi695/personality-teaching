@@ -119,7 +119,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	if params.Type == SingleChoiceQuestion {
 		//QuestionOptionList	JSON序列化
 		optionContext := utils.Obj2Json(params.QuestionOptionList)
-		//以生成的questionID后3位作为分隔符
+		//以生成的questionID后4位取前3位作为分隔符
 		splitNum := utils.SplitNum(questionId)
 		//context拼接
 		params.Context = params.Context + splitNum + optionContext

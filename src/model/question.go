@@ -49,6 +49,9 @@ type QuestionAddInput struct {
 
 // GetKnpIdByModel 知识点拆分
 func (t *QuestionAddInput) GetKnpIdByModel() []string {
+	if t.KnpId == "" {
+		return nil
+	}
 	return strings.Split(t.KnpId, ",")
 }
 
