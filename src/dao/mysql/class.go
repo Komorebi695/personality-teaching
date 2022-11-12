@@ -17,7 +17,7 @@ type classFunc interface {
 	UpdateClass(m model.Class) error
 	DeleteClass(teacherID string, classID string) error
 	QueryClass(classID string) (model.Class, error)
-	QueryClassList(teacherID string, pn int) ([]model.Class, error)
+	QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, error)
 	CheckTeacherClass(teacherID string, classID string) (bool, error)
 }
 
@@ -70,10 +70,10 @@ func (c *ClassMySQL) QueryClass(classID string) (model.Class, error) {
 	return m, nil
 }
 
-func (c *ClassMySQL) QueryClassList(teacherID string, pn int) ([]model.Class, error) {
+func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, error) {
 	var classes []model.Class
-	offset := (pn - 1) * classRows
-	count := classRows
+	offset := (req.PageNum - 1) * classRows
+	count := req.PageSize
 	err := db.Raw("select `t_class`.`class_id`,`name`,`college`,`major` from `t_class` inner join `t_teacher_class` "+
 		"on `t_class`.class_id = `t_teacher_class`.class_id "+
 		"where teacher_id = ? and `is_valid` = ? limit ?,?", teacherID, classValid, offset, count).Scan(&classes).Error

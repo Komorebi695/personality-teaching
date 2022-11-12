@@ -16,7 +16,7 @@ import (
 func AddClass(c *gin.Context) {
 	var req model.ClassAddReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
 	teacherID := c.GetString(middle.TeacherID)
@@ -32,7 +32,7 @@ func AddClass(c *gin.Context) {
 func UpdateClass(c *gin.Context) {
 	var req model.ClassUpdateReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
 	//  校验教师是否有修改此班级权限
@@ -59,7 +59,7 @@ func UpdateClass(c *gin.Context) {
 func DeleteClass(c *gin.Context) {
 	var req model.ClassDeleteReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
 	teacherID := c.GetString(middle.TeacherID)
@@ -86,7 +86,7 @@ func DeleteClass(c *gin.Context) {
 func ClassInfo(c *gin.Context) {
 	var req model.ClassInfoReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
 	class, err := logic.NewClassService().ClassInfo(req.ClassID)
@@ -101,11 +101,11 @@ func ClassInfo(c *gin.Context) {
 func ClassList(c *gin.Context) {
 	var req model.ClassListReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
 	teacherID := c.GetString(middle.TeacherID)
-	classes, err := logic.NewClassService().ClassInfoList(teacherID, req.Page)
+	classes, err := logic.NewClassService().ClassInfoList(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("get class list error: ", zap.Error(err))

@@ -44,5 +44,5 @@ func TeacherLogin(c *gin.Context) {
 		return
 	}
 	c.SetCookie(middle.SessionKey, sessionKey, 0, "", "", false, false)
-	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+	code.CommonResp(c, http.StatusOK, code.Success, teacherID)
 }
