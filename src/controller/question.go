@@ -38,8 +38,10 @@ func QuestionList(c *gin.Context) {
 	out, err := questionService.QuestionListService(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, out)
 }
@@ -64,8 +66,10 @@ func QuestionDelete(c *gin.Context) {
 	err := questionService.QuestionDeleteService(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
@@ -90,6 +94,7 @@ func QuestionAdd(c *gin.Context) {
 	err := questionService.QuestionAddService(c, params)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
@@ -114,8 +119,10 @@ func QuestionDetail(c *gin.Context) {
 	questionDetail, err := questionService.QuestionDetailService(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, questionDetail)
 }
@@ -140,8 +147,10 @@ func QuestionUpdate(c *gin.Context) {
 	err := questionService.QuestionUpdateService(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }

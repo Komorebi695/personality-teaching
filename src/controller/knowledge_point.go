@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -36,8 +37,10 @@ func PointList(c *gin.Context) {
 	out, err := knowledgePointService.KnowledgePointList(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, out)
 }
@@ -55,8 +58,10 @@ func PointOneStageList(c *gin.Context) {
 	out, err := knowledgePointService.KnowledgePointOneStageList(c)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, out)
 }
@@ -81,8 +86,14 @@ func PointDelete(c *gin.Context) {
 	err := knowledgePointService.KnowledgePointDelete(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
+		if err.Error() == errors.New("child node exists err").Error() {
+			code.CommonResp(c, http.StatusOK, code.ChildExit, code.EmptyData)
+			return
+		}
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
@@ -107,6 +118,7 @@ func PointAdd(c *gin.Context) {
 	err := knowledgePointService.KnowledgePointAdd(c, params)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
@@ -119,7 +131,7 @@ func PointAdd(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param knp_id query string true "知识点编号"
-// @Success 200 {object} code.RespMsg{data=mysql.TKnowledgePoint} "success"
+// @Success 200 {object} code.RespMsg{data=mysql.KnowledgePointDetail} "success"
 // @Router /teacher/point/detail [get]
 func PointDetail(c *gin.Context) {
 	params := &model.KnowledgePointDetailInput{}
@@ -131,8 +143,10 @@ func PointDetail(c *gin.Context) {
 	pointDetail, err := knowledgePointService.KnowledgePointDetail(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, pointDetail)
 }
@@ -156,9 +170,11 @@ func PointUpdate(c *gin.Context) {
 	}
 	err := knowledgePointService.KnowledgePointUpdate(c, params)
 	if err == gorm.ErrRecordNotFound {
-		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+		code.CommonResp(c, http.StatusOK, code.RecordNotFound, code.EmptyData)
+		return
 	} else if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }

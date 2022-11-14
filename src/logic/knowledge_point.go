@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"personality-teaching/src/dao/mysql"
@@ -98,11 +99,23 @@ func (q *KnowledgePointService) KnowledgePointDelete(c *gin.Context, params *mod
 		logger.L.Error("`KnowledgePointDelete` -> get pool err:", zap.Error(err))
 		return err
 	}
-	//读取基本信息
+	//查询基本信息
 	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: params.KnpId}
 	knowledgePointInfo, err = knowledgePointInfo.FindOneById(c, tx)
 	if err != nil {
 		logger.L.Error("`KnowledgePointDelete` -> TKnowledgePoint.FindOneById err:", zap.Error(err))
+		return err
+	}
+	//查询该知识点是否存在子知识点
+	children, err := knowledgePointInfo.FindKnowledgeChildren(c, tx)
+	if err != nil {
+		logger.L.Error("`KnowledgePointDelete` -> knowledgePointInfo.FindKnowledgeChildren err:", zap.Error(err))
+		return err
+	}
+	// 若存在子知识点，删除失败返回
+	if len(children) != 0 {
+		err = errors.New("child node exists err")
+		logger.L.Error("`KnowledgePointDelete` -> Child KnowledgePoint exists err:", zap.Error(err))
 		return err
 	}
 	err = knowledgePointInfo.Delete(c, tx)
@@ -194,6 +207,11 @@ func (q *KnowledgePointService) KnowledgePointUpdate(c *gin.Context, params *mod
 		return err
 	}
 	//修改题目信息
+
+	// 若父知识点为空，则默认指向自己
+	if params.ParentKnpId == "" {
+		params.ParentKnpId = params.KnpId
+	}
 	info := knowledgePointInfo
 	info.Name = params.Name
 	info.Context = params.Context
