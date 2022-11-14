@@ -33,7 +33,26 @@ func PointList(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	out, err := knowledgePointService.KnowledgePointListService(c, params)
+	out, err := knowledgePointService.KnowledgePointList(c, params)
+	if err == gorm.ErrRecordNotFound {
+		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
+	} else if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, out)
+}
+
+// PointOneStageList godoc
+// @Summary 知识点一级列表
+// @Description 知识点一级列表
+// @Tags 知识点管理
+// @ID /teacher/point/list/one_stage
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} code.RespMsg{data=model.KnowledgePointOneStageListOutput} "success"
+// @Router /teacher/point/list/one_stage [get]
+func PointOneStageList(c *gin.Context) {
+	out, err := knowledgePointService.KnowledgePointOneStageList(c)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
 	} else if err != nil {
@@ -59,7 +78,7 @@ func PointDelete(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	err := knowledgePointService.KnowledgePointDeleteService(c, params)
+	err := knowledgePointService.KnowledgePointDelete(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
 	} else if err != nil {
@@ -85,7 +104,7 @@ func PointAdd(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	err := knowledgePointService.KnowledgePointAddService(c, params)
+	err := knowledgePointService.KnowledgePointAdd(c, params)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 	}
@@ -109,7 +128,7 @@ func PointDetail(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	pointDetail, err := knowledgePointService.KnowledgePointDetailService(c, params)
+	pointDetail, err := knowledgePointService.KnowledgePointDetail(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
 	} else if err != nil {
@@ -135,7 +154,7 @@ func PointUpdate(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	err := knowledgePointService.KnowledgePointUpdateService(c, params)
+	err := knowledgePointService.KnowledgePointUpdate(c, params)
 	if err == gorm.ErrRecordNotFound {
 		code.CommonResp(c, http.StatusInternalServerError, code.RecordNotFound, code.EmptyData)
 	} else if err != nil {

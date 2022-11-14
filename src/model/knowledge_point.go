@@ -1,6 +1,8 @@
 package model
 
-import "strings"
+import (
+	"strings"
+)
 
 // KnowledgePointListInput 知识点列表输入
 type KnowledgePointListInput struct {
@@ -25,8 +27,21 @@ type KnowledgePointListItemOutput struct {
 	CreateUser  string `json:"create_user" form:"create_user" comment:"录入者"`
 }
 
+// KnowledgePointOneStageListOutput 知识点一级列表输出
+type KnowledgePointOneStageListOutput struct {
+	List []KnpOneStageListItemOutput `json:"list" form:"list" comment:"知识点一级列表"` //列表
+}
+
+// KnpOneStageListItemOutput 知识点一级列表输出的主体
+type KnpOneStageListItemOutput struct {
+	KnpId       string `json:"knp_id" form:"knp_id" comment:"knp_id,知识点编号"`
+	ParentKnpId string `json:"parent_knp_id" form:"parent_knp_id" comment:"父知识点编号，若没有，则是它自身"`
+	Name        string `json:"name" form:"name" comment:"知识点名称"`
+	Level       int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
+	Context     string `json:"context" form:"context" comment:"知识点内容"`
+}
 type KnowledgePointDeleteInput struct {
-	KnpId string `json:"knp_id" form:"knp_id" comment:"知识点ID" binding:"required"` //服务ID
+	KnpId string `json:"knp_id" form:"knp_id" comment:"知识点ID" binding:"required"` //知识点ID
 }
 
 // KnowledgePointAddInput 知识点添加输入
@@ -54,17 +69,4 @@ type KnowledgePointUpdateInput struct {
 
 func (t *KnowledgePointUpdateInput) GetKnpIdByModel() []string {
 	return strings.Split(t.KnpId, ",")
-}
-
-// KnowledgePointOptionOutput 选项信息输出
-type KnowledgePointOptionOutput struct {
-	ID       int64  `json:"id" form:"id" comment:"id"`
-	Context  string `json:"context" form:"context" comment:"选项内容"`
-	IsAnswer int8   `json:"is_answer" form:"is_answer" comment:"是否为正确答案，0：否，1：是"`
-}
-
-// KnowledgePointOptionAddInput 选项添加输入
-type KnowledgePointOptionAddInput struct {
-	Context  string `json:"context" form:"context" comment:"选项内容"`
-	IsAnswer int8   `json:"is_answer" form:"is_answer" comment:"是否为正确答案，0：否，1：是"`
 }
