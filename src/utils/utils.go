@@ -1,10 +1,18 @@
 package utils
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
+	"fmt"
 	"personality-teaching/src/logger"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -13,6 +21,28 @@ import (
 	"github.com/bwmarrin/snowflake"
 )
 
+const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+MIICWwIBAAKBgQDZWVDfaDbhPNYIU4gUsfawpXXTBQA0xf1nrW+g2pFYED+jDyQk
+cumpEl2cAEvF9vJbB7rVIJQFyJfmg0J9XO5X0jDtykJkedHWqi7z9AS056UAXhUQ
+cJ+rGwVDu2oBMT/tbCCbRDzuaLcrd5PPQCI1fIrsNQ511cWH6Hv3Lg3JcwIDAQAB
+AoGAJtlCDUyRUp0PHJnhnuFYWKaacsdYDBa/foKPi07F39m3piuUqDcp8KBpvvKG
+mLHVC9RL3sBd9NKv4/HeNo4fw5pPBjGbqcekYKb2QcA+Mc9HuZojdE6awl1Rf2it
+9jCadijlh7LN4U8748E2qXwFnRThSPypQ+mbZWyoLn4EaIECQQD3yku9AmP9qMtH
+yk4q/qMx3+Rtq49ohsngSa8EhtrYNjaFBRll7wlFg0p/W9JGb5+IDi4xEmJhTMFl
+BfWoFBUhAkEA4IzSuqTwHArKtds2ficGLriiChbt3T1a6XArBg6TsZ7f3x2XoLp2
+1j/rsqA3qSmqv9q32pZaowlL6QxAENE4EwJAfkZzbnDnb/8zCPTJ/RMjK2mDyXfi
+b0wxWMF0FYR7xi9qfUNp/A5i1S/hKSIr+IUt8XH4jD1oMVmiPM9arzr8wQJAXQm8
+Hl1MpzHJf8QONgLRSvZxHSEW+T38txAko2PSyht7wqQuOQhJSMg/TkmYBl0fRFLJ
+LqZxc2/cpfjPaqhlRQJAOiO+BzClFXLlhlozxMc1zvVVvFOMXGSlzxdINC7jDbhG
+chT5nlMu6vn5sgA6Vb3TRW0w98EmxOLcQwpVNiaD5g==
+-----END RSA PRIVATE KEY-----`
+
+const publicKey = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZWVDfaDbhPNYIU4gUsfawpXXT
+BQA0xf1nrW+g2pFYED+jDyQkcumpEl2cAEvF9vJbB7rVIJQFyJfmg0J9XO5X0jDt
+ykJkedHWqi7z9AS056UAXhUQcJ+rGwVDu2oBMT/tbCCbRDzuaLcrd5PPQCI1fIrs
+NQ511cWH6Hv3Lg3JcwIDAQAB
+-----END PUBLIC KEY-----`
 const (
 	nodeID          int64 = 3  // 大于0且小于int64，否则报错
 	low             int64 = 15 // 切片截取下限
@@ -61,6 +91,23 @@ func CompareHash(hashedStr string, str string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// RsaDecrypt 解密前端的RSA加密的密码，返回密码明文
+func RsaDecrypt(pwdReq string) ([]byte, error) {
+	b, err := base64.StdEncoding.DecodeString(pwdReq)
+	if err != nil {
+		return []byte{}, err
+	}
+	block, _ := pem.Decode([]byte(privateKey))
+	if block == nil {
+		return nil, errors.New("private key error!")
+	}
+	PK, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("Parse private key  error:%s", err))
+	}
+	return rsa.DecryptPKCS1v15(rand.Reader, PK, b)
 }
 
 // CurrentTime 获取当前时间 格式化：2006-01-02 15:01:05

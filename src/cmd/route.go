@@ -11,7 +11,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router := gin.Default()
 	router.Use(middlewares...)
 	// 这个可以这样-> "/项目前缀/teacher/login"
-	router.POST("/teacher/login", controller.TeacherLogin)
+	router.POST("/api/teacher/login", controller.TeacherLogin)
 
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	teacherRouter := router.Group("/teacher")
