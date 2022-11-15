@@ -5,8 +5,8 @@ import (
 	"personality-teaching/src/code"
 	"personality-teaching/src/logger"
 	"personality-teaching/src/logic"
-	"personality-teaching/src/middle"
 	"personality-teaching/src/model"
+	"personality-teaching/src/utils"
 	"time"
 
 	"go.uber.org/zap"
@@ -43,6 +43,6 @@ func TeacherLogin(c *gin.Context) {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		return
 	}
-	c.SetCookie(middle.SessionKey, sessionKey, 0, "", "", false, false)
+	c.SetCookie(utils.SessionKey, sessionKey, 0, "", "", false, false)
 	code.CommonResp(c, http.StatusOK, code.Success, teacherID)
 }

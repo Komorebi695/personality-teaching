@@ -23,6 +23,11 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.DELETE("/class", controller.DeleteClass)
 		teacherRouter.GET("/class", controller.ClassInfo)
 		teacherRouter.GET("/class/list", controller.ClassList)
+		// 班级学生管理
+		teacherRouter.POST("/student", controller.CreateStudent)
+		teacherRouter.POST("/class/student", controller.AddStudentToClass)
+		teacherRouter.GET("/teacher/class/student/list", controller.StudentsInClass)
+		teacherRouter.GET("/teacher/student/list", controller.StudentNotInClass)
 		// 试卷管理
 		teacherRouter.POST("/exam", controller.AddExam)
 		teacherRouter.PUT("/exam", controller.UpdateExam)

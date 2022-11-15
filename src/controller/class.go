@@ -5,8 +5,8 @@ import (
 	"personality-teaching/src/code"
 	"personality-teaching/src/logger"
 	"personality-teaching/src/logic"
-	"personality-teaching/src/middle"
 	"personality-teaching/src/model"
+	"personality-teaching/src/utils"
 
 	"go.uber.org/zap"
 
@@ -19,7 +19,7 @@ func AddClass(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	class, err := logic.NewClassService().ClassAdd(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
@@ -36,7 +36,7 @@ func UpdateClass(c *gin.Context) {
 		return
 	}
 	//  校验教师是否有修改此班级权限
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	legal, err := logic.NewClassService().CheckPermission(teacherID, req.ClassID)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
@@ -62,7 +62,7 @@ func DeleteClass(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	//  校验教师是否有修改此班级权限
 	legal, err := logic.NewClassService().CheckPermission(teacherID, req.ClassID)
 	if err != nil {
@@ -104,7 +104,7 @@ func ClassList(c *gin.Context) {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
 	}
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	classes, err := logic.NewClassService().ClassInfoList(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)

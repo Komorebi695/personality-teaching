@@ -13,9 +13,15 @@ import (
 	"github.com/bwmarrin/snowflake"
 )
 
-const nodeID int64 = 3 // 大于0且小于int64，否则报错
-const low int64 = 15   // 切片截取下限
-const high int64 = 18  // 切片截取上限
+const (
+	nodeID          int64 = 3  // 大于0且小于int64，否则报错
+	low             int64 = 15 // 切片截取下限
+	high            int64 = 18 // 切片截取上限
+	EmptyClassID          = "0"
+	DefaultPassWord       = "123456"
+	SessionKey            = "session_key"
+	TeacherID             = "teacher"
+)
 
 // GenSnowID 生成ID时会上锁，确保不重复
 func GenSnowID() string {
@@ -36,6 +42,12 @@ func Encryption(toHash string) (string, error) {
 		return "", err
 	}
 	return string(hashedID), nil
+}
+
+// GetDefaultPassWord 返回加密后的默认密码
+func GetDefaultPassWord() string {
+	s, _ := Encryption(DefaultPassWord)
+	return s
 }
 
 // CompareHash 请确保传入的hashedStr 不为空字符串，否则将报错

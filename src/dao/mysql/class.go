@@ -9,7 +9,6 @@ import (
 const (
 	classValid   int8 = 1 //合法记录
 	classInvalid int8 = 0 //不合法记录
-	classRows    int  = 10
 )
 
 type classFunc interface {
@@ -72,7 +71,7 @@ func (c *ClassMySQL) QueryClass(classID string) (model.Class, error) {
 
 func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, error) {
 	var classes []model.Class
-	offset := (req.PageNum - 1) * classRows
+	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
 	err := db.Raw("select `t_class`.`class_id`,`name`,`college`,`major` from `t_class` inner join `t_teacher_class` "+
 		"on `t_class`.class_id = `t_teacher_class`.class_id "+
