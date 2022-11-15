@@ -103,3 +103,28 @@ func StudentNotInClass(c *gin.Context) {
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, resp)
 }
+
+func DeleteClassStudent(c *gin.Context) {
+	var req model.DeleteClassStudentReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	// 校验班级学生关系
+	ok, err := logic.NewStudentService().CheckStudentClass(req.StudentID, req.ClassID)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("CheckStudentClass error: ", zap.Error(err))
+		return
+	}
+	if !ok {
+		code.CommonResp(c, http.StatusOK, code.NotInClass, code.EmptyData)
+		return
+	}
+	if err = logic.NewStudentService().RemoveStudentClass(req.StudentID); err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("RemoveStudentClass error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+}

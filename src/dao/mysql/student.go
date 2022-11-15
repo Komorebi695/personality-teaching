@@ -7,6 +7,7 @@ type studentFunc interface {
 	UpdateClassID(studentID, classID string) error
 	QueryStudent(studentID string) (model.Student, error)
 	QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error)
+	CheckStudentClass(studentID string, classID string) (bool, error)
 }
 
 var _ studentFunc = &StudentMySQL{}
@@ -43,4 +44,14 @@ func (s *StudentMySQL) QueryStudentsInClass(req model.ClassStudentListReq) ([]mo
 		return []model.ClassStudentListResp{}, err
 	}
 	return students, nil
+}
+
+// CheckStudentClass 检查学生是否在班级中
+func (s *StudentMySQL) CheckStudentClass(studentID string, classID string) (bool, error) {
+	id := -1
+	err := db.Raw("select `id` from `t_student` where `student_id` = ? and `class_id` = ?", studentID, classID).Scan(&id).Error
+	if err != nil {
+		return false, err
+	}
+	return id != -1, nil
 }

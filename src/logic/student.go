@@ -10,6 +10,8 @@ type studentFunc interface {
 	CreateStudent(req model.CreateStudentReq) (model.CreateStudentResp, error)
 	UpdateClassID(req model.AddStudentToClassReq) (model.AddStudentClassResp, error)
 	GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error)
+	RemoveStudentClass(studentID string) error
+	CheckStudentClass(studentID string, classID string) (bool, error)
 }
 
 var _ studentFunc = &StudentService{}
@@ -57,4 +59,12 @@ func (s *StudentService) GetStudentsInClass(req model.ClassStudentListReq) ([]mo
 		return []model.ClassStudentListResp{}, err
 	}
 	return students, nil
+}
+
+func (s *StudentService) RemoveStudentClass(studentID string) error {
+	return mysql.NewStudentMySQL().UpdateClassID(studentID, utils.EmptyClassID)
+}
+
+func (s *StudentService) CheckStudentClass(studentID string, classID string) (bool, error) {
+	return mysql.NewStudentMySQL().CheckStudentClass(studentID, classID)
 }

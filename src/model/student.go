@@ -53,3 +53,8 @@ type EmptyClassStudentReq struct {
 	PageNum  int `form:"page_num" binding:"required"`
 	PageSize int `form:"page_size" binding:"required"`
 }
+
+type DeleteClassStudentReq struct {
+	ClassID   string `form:"class_id" binding:"required"`
+	StudentID string `form:"student_id" binding:"required"`
+}
