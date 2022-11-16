@@ -1,15 +1,16 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"personality-teaching/src/code"
 	"personality-teaching/src/logger"
 	"personality-teaching/src/logic"
-	"personality-teaching/src/middle"
 	"personality-teaching/src/model"
+	"personality-teaching/src/utils"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var es = logic.NewExamService()
@@ -29,7 +30,7 @@ func AddExam(c *gin.Context) {
 		return
 	}
 	// 获取当前登录的老师编号
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	exam, err := es.Add(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
@@ -91,7 +92,7 @@ func ExamList(c *gin.Context) {
 		return
 	}
 	// 获取当前登录的老师编号
-	teacherID := c.GetString(middle.TeacherID)
+	teacherID := c.GetString(utils.TeacherID)
 	// 查询
 	resp, err := es.List(teacherID, req)
 	if err != nil {

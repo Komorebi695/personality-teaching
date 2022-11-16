@@ -33,5 +33,6 @@ type ClassInfoReq struct {
 }
 
 type ClassListReq struct {
-	Page int `form:"pn" binding:"required"`
+	PageNum  int `form:"page_num" binding:"required"`
+	PageSize int `form:"page_size" binding:"required"`
 }
