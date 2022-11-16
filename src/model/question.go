@@ -6,7 +6,9 @@ import (
 
 // QuestionListInput 题目列表输入
 type QuestionListInput struct {
-	Info     string `json:"info" form:"info" comment:"关键词" example:"" binding:""`
+	Context  string `json:"context" form:"context" comment:"关键词"`
+	Type     int    `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题"`
+	Level    int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
 	PageNo   int    `json:"page_no" form:"page_no" comment:"页数" example:"1" binding:"required"`
 	PageSize int    `json:"page_size" form:"page_size" comment:"每页条数" example:"20" binding:"required"`
 }
@@ -23,7 +25,7 @@ type QuestionListItemOutput struct {
 	Type         int               `json:"type" form:"type" comment:"题目类型，1：选择题，2：填空题，3：问答题"`
 	Level        int               `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
 	QuestionName string            `json:"question_name" form:"question_name" comment:"题目名称,即题目主体"`
-	Context      string            `json:"context" form:"context" comment:"题目内容，存放题目中除了题干文字之外的内容，如图片地址"`
+	Context      string            `json:"context" form:"context" comment:"题目内容"`
 	Option       []*QuestionOption `json:"question_option_list" form:"question_option_list" comment:"选项信息，非选择题则为空"`
 	Answer       string            `json:"answer" form:"answer" comment:"题目答案"`
 	CreateUser   string            `json:"create_user" form:"create_user" comment:"录入者"`
@@ -47,6 +49,9 @@ type QuestionAddInput struct {
 
 // GetKnpIdByModel 知识点拆分
 func (t *QuestionAddInput) GetKnpIdByModel() []string {
+	if t.KnpId == "" {
+		return nil
+	}
 	return strings.Split(t.KnpId, ",")
 }
 

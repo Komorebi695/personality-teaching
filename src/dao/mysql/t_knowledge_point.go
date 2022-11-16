@@ -45,11 +45,20 @@ func (t *TKnowledgePoint) PageList(c *gin.Context, tx *gorm.DB, param *model.Kno
 		query = query.Where("(name like ?)", "%"+param.Info+"%")
 	}
 
-	if err := query.Limit(param.PageSize).Offset(offset).Order("id desc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
+	query.Limit(param.PageSize).Offset(-1).Count(&total)
+	if err := query.Limit(param.PageSize).Offset(offset).Order("id asc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0, err
 	}
-	query.Limit(param.PageSize).Offset(offset).Count(&total)
+
 	return list, total, nil
+}
+func (t *TKnowledgePoint) PageListOneStage(c *gin.Context, tx *gorm.DB) ([]model.KnpOneStageListItemOutput, error) {
+	var list []model.KnpOneStageListItemOutput
+
+	if err := tx.WithContext(c).Table("t_knowledge_point A").Select("A.knp_id,A.name,A.context,A.parent_knp_id,A.level,B.knp_id,B.level,B.name,B.context,B.parent_knp_id").Joins("inner join t_knowledge_point B on A.knp_id = B.parent_knp_id and B.knp_id = A.parent_knp_id").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return list, nil
 }
 func (t *TKnowledgePoint) Delete(c *gin.Context, tx *gorm.DB) error {
 	if err := tx.WithContext(c).Delete(t).Error; err != nil {
@@ -59,4 +68,14 @@ func (t *TKnowledgePoint) Delete(c *gin.Context, tx *gorm.DB) error {
 }
 func (t *TKnowledgePoint) Save(c *gin.Context, tx *gorm.DB) error {
 	return tx.WithContext(c).Save(t).Error
+}
+
+//FindKnowledgeChildren 查找子节点
+func (t *TKnowledgePoint) FindKnowledgeChildren(c *gin.Context, tx *gorm.DB) ([]*TKnowledgePoint, error) {
+	var list []*TKnowledgePoint
+	err := tx.WithContext(c).Table(t.TableName()).Where("parent_knp_id = ?", t.KnpId).Not("knp_id = ?", t.KnpId).Find(&list).Error
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
