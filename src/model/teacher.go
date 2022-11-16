@@ -15,7 +15,7 @@ func (t Teacher) TableName() string {
 
 type TeacherLoginReq struct {
 	UserName string `binding:"required,min=1,max=20" form:"username"`
-	Password string `binding:"required,min=1,max=20" form:"password"`
+	Password string `binding:"required,min=1" form:"password"`
 }
 
 type SessionValue struct {

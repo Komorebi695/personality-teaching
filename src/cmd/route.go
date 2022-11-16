@@ -11,7 +11,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router := gin.Default()
 	router.Use(middlewares...)
 	// 这个可以这样-> "/项目前缀/teacher/login"
-	router.POST("/teacher/login", controller.TeacherLogin)
+	router.POST("/api/teacher/login", controller.TeacherLogin)
 
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	//开启登录认证,以下接口需要认证成功才能访问
@@ -24,6 +24,12 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.DELETE("/class", controller.DeleteClass)
 		teacherRouter.GET("/class", controller.ClassInfo)
 		teacherRouter.GET("/class/list", controller.ClassList)
+		// 班级学生管理
+		teacherRouter.POST("/student", controller.CreateStudent)
+		teacherRouter.POST("/class/student", controller.AddStudentToClass)
+		teacherRouter.GET("/class/student/list", controller.StudentsInClass)
+		teacherRouter.GET("/student/list", controller.StudentNotInClass)
+		teacherRouter.DELETE("/class/student", controller.DeleteClassStudent)
 		// 试卷管理
 		teacherRouter.POST("/exam", controller.AddExam)
 		teacherRouter.PUT("/exam", controller.UpdateExam)
