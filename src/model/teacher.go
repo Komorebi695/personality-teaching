@@ -23,3 +23,11 @@ type SessionValue struct {
 	RoleType   int8   `json:"role_type"`
 	CreateTime int64  `json:"create_time"`
 }
+
+type TeacherInfoResp struct {
+	TeacherID   string `json:"teacher_id"`
+	Name        string `json:"name"`
+	College     string `json:"college"`
+	Major       string `json:"major"`
+	PhoneNumber string `json:"phone_number"`
+}

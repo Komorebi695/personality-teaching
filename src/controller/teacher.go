@@ -55,3 +55,15 @@ func TeacherLogin(c *gin.Context) {
 	c.SetCookie(utils.SessionKey, sessionKey, 0, "", "", false, false)
 	code.CommonResp(c, http.StatusOK, code.Success, teacherID)
 }
+
+func TeacherInfo(c *gin.Context) {
+	teacherID := c.GetString(utils.TeacherID)
+
+	resp, err := logic.NewTeacherService().GetTeacherInfo(teacherID)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("GetTeacherInfo error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, resp)
+}
