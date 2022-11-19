@@ -22,3 +22,20 @@ func CommonResp(c *gin.Context, httpCode int, statusCode ResCode, data interface
 	c.JSON(httpCode, *NewRespMsg(statusCode, data))
 	c.Abort() //此路由后的 gin.HandlerFunc 将不再被调用
 }
+
+type ListResp struct {
+	Code  ResCode     `json:"code"`
+	Msg   string      `json:"msg"`
+	Data  interface{} `json:"data"`
+	Total int         `json:"total"`
+}
+
+func RespList(c *gin.Context, httpCode int, statusCode ResCode, data interface{}, total int) {
+	c.JSON(httpCode, ListResp{
+		Code:  statusCode,
+		Msg:   statusCode.StatusText(),
+		Data:  data,
+		Total: total,
+	})
+	c.Abort()
+}
