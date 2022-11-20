@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"personality-teaching/src/controller"
+	"personality-teaching/src/middle"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
@@ -14,7 +15,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	//开启登录认证,以下接口需要认证成功才能访问
 	teacherRouter := router.Group("/teacher")
-	//teacherRouter.Use(middle.VerifyTeacher)
+	teacherRouter.Use(middle.VerifyTeacher)
 	{
 		// 班级管理
 		teacherRouter.POST("/class", controller.AddClass)
