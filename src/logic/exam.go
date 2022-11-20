@@ -16,7 +16,15 @@ func NewExamService() *ExamService {
 	return &ExamService{}
 }
 
-var edb = mysql.NewExamMysql()
+// SearchExam ,新增试卷逻辑处理部分
+//Param：
+// text：搜索文本
+// teacherID：老师编号
+//Return value：
+// 试卷的信息和错误
+func (ec *ExamService) SearchExam(text string, teacherID string) (model.ExamListResp, error) {
+	return mysql.NewExamMysql().Query(text, teacherID)
+}
 
 // Add ,新增试卷逻辑处理部分
 //Param：
@@ -32,7 +40,7 @@ func (ec *ExamService) Add(teacherID string, req model.ExamAddReq) (model.Exam, 
 		CreateTime:      utils.CurrentTime(),
 		BaseExamInfo:    req.BaseExamInfo,
 	}
-	if err := edb.Insert(exam); err != nil {
+	if err := mysql.NewExamMysql().Insert(exam); err != nil {
 		return model.Exam{}, err
 	}
 	return exam, nil
@@ -49,7 +57,7 @@ func (ec *ExamService) Update(req model.ExamUpdateReq) error {
 		BaseExamInfo: req.BaseExamInfo,
 		UpdateTime:   utils.CurrentTime(),
 	}
-	return edb.UpdateExam(exam)
+	return mysql.NewExamMysql().UpdateExam(exam)
 }
 
 // Delete ,删除试卷
@@ -58,7 +66,7 @@ func (ec *ExamService) Update(req model.ExamUpdateReq) error {
 //Return value：
 // 错误信息
 func (ec *ExamService) Delete(req model.ExamDeleteReq) error {
-	return edb.DeleteExam(req.ExamID)
+	return mysql.NewExamMysql().DeleteExam(req.ExamID)
 }
 
 // List ,获取当前老师的所有试卷
@@ -67,9 +75,9 @@ func (ec *ExamService) Delete(req model.ExamDeleteReq) error {
 // req: 分页参数
 //Return value：
 // 所有试卷信息和错误信息
-func (ec *ExamService) List(teacherID string, req model.PagingReq) ([]model.ExamResp, error) {
+func (ec *ExamService) List(teacherID string, req model.PagingReq) (model.ExamListResp, error) {
 	offset := (req.Page - int(one)) * req.PageSize
-	return edb.QueryExamList(teacherID, offset, req.PageSize)
+	return mysql.NewExamMysql().QueryExamList(teacherID, offset, req.PageSize)
 }
 
 // Details ,获取试卷详细信息
@@ -78,7 +86,7 @@ func (ec *ExamService) List(teacherID string, req model.PagingReq) ([]model.Exam
 //Return value：
 // 试卷信息和错误信息
 func (ec *ExamService) Details(examID string) (model.ExamDetailResp, error) {
-	return edb.QueryExam(examID)
+	return mysql.NewExamMysql().QueryExam(examID)
 }
 
 // SendPerson ,按个人发放卷
@@ -93,7 +101,7 @@ func (ec *ExamService) SendPerson(req model.SendPersonReq) error {
 		UpdateTime: utils.CurrentTime(),
 		CreateTime: utils.CurrentTime(),
 	}
-	return edb.SendExamStudent(se)
+	return mysql.NewExamMysql().SendExamStudent(se)
 }
 
 // SendClass ,按班级发放试卷
@@ -108,5 +116,5 @@ func (ec *ExamService) SendClass(req model.SendClassReq) error {
 		UpdateTime: utils.CurrentTime(),
 		CreateTime: utils.CurrentTime(),
 	}
-	return edb.SendExamClass(ce)
+	return mysql.NewExamMysql().SendExamClass(ce)
 }

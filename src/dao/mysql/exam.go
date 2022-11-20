@@ -10,12 +10,32 @@ type examFunc interface {
 	UpdateExam(exam model.Exam) error
 	DeleteExam(examID string) error
 	QueryExam(examID string) (model.ExamDetailResp, error)
-	QueryExamList(teacherID string, page int, pageSize int) ([]model.ExamResp, error)
+	QueryExamList(teacherID string, offset int, pageSize int) (model.ExamListResp, error)
 	SendExamStudent(req model.StudentExam) error
 	SendExamClass(req model.ClassExam) error
+	Query(text string, teacherID string) (model.ExamListResp, error)
 }
 
 type ExamMySQL struct{}
+
+// Query 模糊查询
+func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, error) {
+	var exams []model.ExamResp
+	examName := "%" + text + "%"
+	// 查询试卷列表
+	if err := db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
+		"from `t_exam` "+
+		"where `create_teacher_id`=? and `exam_name` like ? "+
+		"order by `create_time` "+
+		"desc ",
+		teacherID, examName).Scan(&exams).Error; err != nil {
+		return model.ExamListResp{}, err
+	}
+	var examList model.ExamListResp
+	examList.Total = len(exams)
+	examList.ExamList = exams
+	return examList, nil
+}
 
 var _ examFunc = &ExamMySQL{}
 
@@ -70,8 +90,9 @@ func (e ExamMySQL) QueryExam(examID string) (model.ExamDetailResp, error) {
 // teacherID: 老师编号
 // offset: 开始的序号（最小为0开始）
 // pageSize: 每页的大小
-func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) ([]model.ExamResp, error) {
+func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) (model.ExamListResp, error) {
 	var exams []model.ExamResp
+	// 查询试卷列表
 	if err := db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
 		"from `t_exam` "+
 		"where `create_teacher_id`=? "+
@@ -79,9 +100,20 @@ func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) ([]
 		"desc "+
 		"limit ?,?",
 		teacherID, offset, pageSize).Scan(&exams).Error; err != nil {
-		return nil, err
+		return model.ExamListResp{}, err
 	}
-	return exams, nil
+
+	var total int
+	// 查询试卷总数
+	if err := db.Raw("select count(*) from `t_exam` where `create_teacher_id`=?", teacherID).Scan(&total).Error; err != nil {
+		return model.ExamListResp{}, err
+	}
+	var examList model.ExamListResp
+	examList.Total = total
+
+	examList.ExamList = exams
+
+	return examList, nil
 }
 
 // SendExamStudent ,插入学生试卷
