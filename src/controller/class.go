@@ -101,16 +101,16 @@ func ClassInfo(c *gin.Context) {
 func ClassList(c *gin.Context) {
 	var req model.ClassListReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
 	teacherID := c.GetString(utils.TeacherID)
 	classes, err := logic.NewClassService().ClassInfoList(teacherID, req)
 	if err != nil {
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("get class list error: ", zap.Error(err))
 		return
 	}
 
-	code.CommonResp(c, http.StatusOK, code.Success, classes)
+	code.RespList(c, http.StatusOK, code.Success, classes, len(classes))
 }

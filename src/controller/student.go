@@ -60,35 +60,35 @@ func AddStudentToClass(c *gin.Context) {
 func StudentsInClass(c *gin.Context) {
 	var req model.ClassStudentListReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
 	// 校验教师是否有该班级的权限和班级是否存在
 	teacherID := c.GetString(utils.TeacherID)
 	ok, err := logic.NewClassService().CheckPermission(teacherID, req.ClassID)
 	if err != nil {
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("CheckPermission error: ", zap.Error(err))
 		return
 	}
 	if !ok {
-		code.CommonResp(c, http.StatusOK, code.InvalidPermission, code.EmptyData)
+		code.RespList(c, http.StatusOK, code.InvalidPermission, code.EmptyData, 0)
 		return
 	}
 	resp, err := logic.NewStudentService().GetStudentsInClass(req)
 	if err != nil {
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
 		return
 	}
-	code.CommonResp(c, http.StatusOK, code.Success, resp)
+	code.RespList(c, http.StatusOK, code.Success, resp, len(resp))
 }
 
 // StudentNotInClass 查询未加入班级的学生
 func StudentNotInClass(c *gin.Context) {
 	var req model.EmptyClassStudentReq
 	if err := c.ShouldBind(&req); err != nil {
-		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
 	resp, err := logic.NewStudentService().GetStudentsInClass(model.ClassStudentListReq{
@@ -97,11 +97,11 @@ func StudentNotInClass(c *gin.Context) {
 		PageSize: req.PageSize,
 	})
 	if err != nil {
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
 		return
 	}
-	code.CommonResp(c, http.StatusOK, code.Success, resp)
+	code.RespList(c, http.StatusOK, code.Success, resp, len(resp))
 }
 
 func DeleteClassStudent(c *gin.Context) {

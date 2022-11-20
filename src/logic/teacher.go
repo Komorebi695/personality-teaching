@@ -19,6 +19,7 @@ type teacherFunc interface {
 	CheckTeacherPwd(username string, password string) (string, error)
 	StoreSession(session model.SessionValue) (string, error)
 	CheckTeacherPermission(sessionKey string) (string, error)
+	GetTeacherInfo(teacherID string) (model.TeacherInfoResp, error)
 }
 
 var _ teacherFunc = &TeacherService{}
@@ -29,7 +30,7 @@ func NewTeacherService() *TeacherService {
 
 // CheckTeacherPwd  校验通过返回teacherID，失败返回空字符串
 func (t *TeacherService) CheckTeacherPwd(username string, password string) (string, error) {
-	teacher, err := mysql.NewTeacherMysql().QueryAllInfo(username)
+	teacher, err := mysql.NewTeacherMysql().QueryAllByName(username)
 	if err != nil || teacher.TeacherID == "" {
 		return "", err
 	}
@@ -76,4 +77,18 @@ func (t *TeacherService) CheckTeacherPermission(sessionKey string) (string, erro
 		return "", err
 	}
 	return sv.UserID, nil
+}
+
+func (*TeacherService) GetTeacherInfo(teacherID string) (model.TeacherInfoResp, error) {
+	t, err := mysql.NewTeacherMysql().QueryAllByID(teacherID)
+	if err != nil {
+		return model.TeacherInfoResp{}, err
+	}
+	return model.TeacherInfoResp{
+		TeacherID:   t.TeacherID,
+		Name:        t.Name,
+		College:     t.College,
+		Major:       t.Major,
+		PhoneNumber: t.PhoneNumber,
+	}, nil
 }

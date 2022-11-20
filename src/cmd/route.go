@@ -18,6 +18,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	teacherRouter := router.Group("/teacher")
 	teacherRouter.Use(middle.VerifyTeacher)
 	{
+		//教师信息
+		teacherRouter.GET("/info", controller.TeacherInfo)
 		// 班级管理
 		teacherRouter.POST("/class", controller.AddClass)
 		teacherRouter.PUT("/class", controller.UpdateClass)
