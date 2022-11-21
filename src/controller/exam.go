@@ -13,7 +13,28 @@ import (
 	"go.uber.org/zap"
 )
 
-var es = logic.NewExamService()
+// SearchExam ,搜索试卷
+// Param:
+//  text: 搜索文本
+// Router /teacher/exam/search [post]
+func SearchExam(c *gin.Context) {
+	var req model.SearchReq
+	// 绑定请求参数到 ExamAddReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		logger.L.Error("add exam error: ", zap.Error(err))
+		return
+	}
+	// 获取当前登录的老师编号
+	teacherID := c.GetString(utils.TeacherID)
+	res, err := logic.NewExamService().SearchExam(req.Text, teacherID)
+	if err != nil {
+		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		logger.L.Error("search exam error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, res)
+}
 
 // AddExam ,新增试卷
 // Param:
@@ -31,7 +52,7 @@ func AddExam(c *gin.Context) {
 	}
 	// 获取当前登录的老师编号
 	teacherID := c.GetString(utils.TeacherID)
-	exam, err := es.Add(teacherID, req)
+	exam, err := logic.NewExamService().Add(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("add exam error: ", zap.Error(err))
@@ -54,7 +75,7 @@ func UpdateExam(c *gin.Context) {
 		return
 	}
 	// 执行更新
-	if err := es.Update(req); err != nil {
+	if err := logic.NewExamService().Update(req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 		logger.L.Error("update exam error: ", zap.Error(err))
 		return
@@ -73,7 +94,7 @@ func DeleteExam(c *gin.Context) {
 		return
 	}
 	// 执行删除
-	if err := es.Delete(req); err != nil {
+	if err := logic.NewExamService().Delete(req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 		return
 	}
@@ -94,7 +115,7 @@ func ExamList(c *gin.Context) {
 	// 获取当前登录的老师编号
 	teacherID := c.GetString(utils.TeacherID)
 	// 查询
-	resp, err := es.List(teacherID, req)
+	resp, err := logic.NewExamService().List(teacherID, req)
 	if err != nil {
 		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam list error: ", zap.Error(err))
@@ -108,13 +129,13 @@ func ExamList(c *gin.Context) {
 // exam_id 试卷编号
 // Router /teacher/exam [get]
 func ExamInfo(c *gin.Context) {
-	var req model.ExamDetailsReq
+	var req model.ExamIDReq
 	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
 	// 查询
-	examDetail, err := es.Details(req.ExamID)
+	examDetail, err := logic.NewExamService().Details(req.ExamID)
 	if err != nil {
 		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam detail error: ", zap.Error(err))
@@ -141,12 +162,12 @@ func SendExam(c *gin.Context) {
 	// 按个人发放
 	if num == 1 {
 		var req model.SendPersonReq
-		if err := c.ShouldBind(&req); err != nil {
+		if err := c.ShouldBindJSON(&req); err != nil {
 			code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 			logger.L.Error("绑定参数错误: ", zap.Error(err))
 			return
 		}
-		if err := es.SendPerson(req); err != nil {
+		if err := logic.NewExamService().SendPerson(req); err != nil {
 			code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 			logger.L.Error("send exam by person error: ", zap.Error(err))
 			return
@@ -159,7 +180,7 @@ func SendExam(c *gin.Context) {
 			code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 			return
 		}
-		if err := es.SendClass(req); err != nil {
+		if err := logic.NewExamService().SendClass(req); err != nil {
 			code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 			logger.L.Error("send exam by class error: ", zap.Error(err))
 			return

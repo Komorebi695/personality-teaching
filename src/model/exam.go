@@ -35,8 +35,8 @@ type ExamUpdateReq struct {
 	BaseExamInfo
 }
 
-// ExamDetailsReq ,试卷详情
-type ExamDetailsReq struct {
+// ExamIDReq ,试卷详情
+type ExamIDReq struct {
 	ExamID string `gorm:"column:exam_id" form:"exam_id" binding:"required" json:"exam_id"`
 }
 
@@ -44,6 +44,11 @@ type ExamDetailsReq struct {
 type PagingReq struct {
 	Page     int `json:"page" form:"page"`           // 页数（第几页）
 	PageSize int `json:"page_size" form:"page_size"` // 页面大小
+}
+
+type ExamListResp struct {
+	Total    int        `gorm:"total" json:"total"`
+	ExamList []ExamResp `gorm:"exam_list" json:"exam_list"`
 }
 
 // ExamResp ,试卷列表返回结构
@@ -59,4 +64,8 @@ type ExamDetailResp struct {
 	ExamID string `gorm:"column:exam_id" form:"exam_id" binding:"required" json:"exam_id"` // 试卷编号
 	BaseExamInfo
 	UpdateTime string `gorm:"column:update_time" json:"update_time"` // 更新时间
+}
+
+type SearchReq struct {
+	Text string `json:"text"`
 }

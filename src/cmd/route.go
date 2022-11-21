@@ -1,17 +1,16 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"personality-teaching/src/controller"
 	"personality-teaching/src/middle"
-
-	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router := gin.Default()
 	router.Use(middlewares...)
 	// 这个可以这样-> "/项目前缀/teacher/login"
-	router.POST("/api/teacher/login", controller.TeacherLogin)
+	router.POST("/teacher/login", controller.TeacherLogin)
 
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	//开启登录认证,以下接口需要认证成功才能访问
@@ -39,6 +38,13 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/exam", controller.ExamInfo)
 		teacherRouter.GET("/exam/list", controller.ExamList)
 		teacherRouter.POST("/exam/send/:id", controller.SendExam)
+		teacherRouter.POST("/exam/search", controller.SearchExam)
+		//试卷评阅
+		teacherRouter.GET("/review/class", controller.ReviewClass)
+		teacherRouter.GET("/review/student/list", controller.ReviewStudentList)
+		teacherRouter.GET("/review/student", controller.ReviewStudent)
+		teacherRouter.PUT("/review", controller.ReviewUpdate)
+
 		//题目管理
 		teacherRouter.GET("/question/list", controller.QuestionList)
 		teacherRouter.DELETE("/question", controller.QuestionDelete)
