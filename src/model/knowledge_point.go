@@ -67,6 +67,12 @@ type KnowledgePointUpdateInput struct {
 	CreateUser  string `json:"create_user" form:"create_user" comment:"录入者"`
 }
 
-func (t *KnowledgePointUpdateInput) GetKnpIdByModel() []string {
-	return strings.Split(t.KnpId, ",")
+// KnpConnectionUpdateInput 知识点联系修改输入
+type KnpConnectionUpdateInput struct {
+	KnpId  string `json:"knp_id" form:"knp_id" comment:"知识点编号"`
+	PKnpId string `json:"p_knp_id" form:"p_knp_id" comment:"前驱知识点编号，多个编号间用,隔开"`
+}
+
+func (t *KnpConnectionUpdateInput) GetKnpIdByModel() []string {
+	return strings.Split(t.PKnpId, ",")
 }
