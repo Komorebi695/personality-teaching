@@ -96,10 +96,10 @@ func (ec *ExamService) Details(examID string) (model.ExamDetailResp, error) {
 // 错误信息
 func (ec *ExamService) SendPerson(req model.SendPersonReq) error {
 	se := model.StudentExam{
-		SendReq:    req.SendReq,
-		StudentID:  req.StudentID,
-		UpdateTime: utils.CurrentTime(),
-		CreateTime: utils.CurrentTime(),
+		SendReq:     req.SendReq,
+		StudentList: req.StudentList,
+		UpdateTime:  utils.CurrentTime(),
+		CreateTime:  utils.CurrentTime(),
 	}
 	return mysql.NewExamMysql().SendExamStudent(se)
 }
@@ -112,7 +112,7 @@ func (ec *ExamService) SendPerson(req model.SendPersonReq) error {
 func (ec *ExamService) SendClass(req model.SendClassReq) error {
 	ce := model.ClassExam{
 		SendReq:    req.SendReq,
-		ClassID:    req.ClassID,
+		ClassList:  req.ClassList,
 		UpdateTime: utils.CurrentTime(),
 		CreateTime: utils.CurrentTime(),
 	}

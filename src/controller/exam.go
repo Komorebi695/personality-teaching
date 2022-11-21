@@ -162,7 +162,7 @@ func SendExam(c *gin.Context) {
 	// 按个人发放
 	if num == 1 {
 		var req model.SendPersonReq
-		if err := c.ShouldBind(&req); err != nil {
+		if err := c.ShouldBindJSON(&req); err != nil {
 			code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 			logger.L.Error("绑定参数错误: ", zap.Error(err))
 			return

@@ -1,8 +1,10 @@
 package mysql
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"personality-teaching/src/model"
+	"strings"
 )
 
 type examFunc interface {
@@ -35,12 +37,6 @@ func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, err
 	examList.Total = len(exams)
 	examList.ExamList = exams
 	return examList, nil
-}
-
-var _ examFunc = &ExamMySQL{}
-
-func NewExamMysql() *ExamMySQL {
-	return &ExamMySQL{}
 }
 
 // Insert 插入试卷
@@ -118,9 +114,22 @@ func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) (mo
 
 // SendExamStudent ,插入学生试卷
 func (e ExamMySQL) SendExamStudent(req model.StudentExam) error {
+	var sql string
+	sql = "insert into `t_student_exam`(`exam_id`,`student_id`,`comment`,`start_time`,`end_time`,`update_time`,`create_time`) values"
+	for k, _ := range req.StudentList {
+		var temp string
+		if k == len(req.StudentList)-1 {
+			temp = fmt.Sprintf("%s'%s','%s','%s','%s','%s','%s','%s'%s;", "(", req.ExamID, req.StudentList[k].StudentID, req.Comment, req.StartTime, req.EndTime, req.UpdateTime, req.CreateTime, ")")
+		} else {
+			temp = fmt.Sprintf("%s'%s','%s','%s','%s','%s','%s','%s'%s,", "(", req.ExamID, req.StudentList[k].StudentID, req.Comment, req.StartTime, req.EndTime, req.UpdateTime, req.CreateTime, ")")
+		}
+		var build strings.Builder
+		build.WriteString(sql)
+		build.WriteString(temp)
+		sql = build.String()
+	}
 	return db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("insert into `t_student_exam`(`exam_id`,`student_id`,`comment`,`start_time`,`end_time`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
-			req.ExamID, req.StudentID, req.Comment, req.StartTime, req.EndTime, req.UpdateTime, req.CreateTime).Error; err != nil {
+		if err := tx.Exec(sql).Error; err != nil {
 			return err
 		}
 		return nil
@@ -129,14 +138,33 @@ func (e ExamMySQL) SendExamStudent(req model.StudentExam) error {
 
 // SendExamClass ,按班级插入试卷
 func (e ExamMySQL) SendExamClass(ce model.ClassExam) error {
+	pre := "INSERT `t_student_exam`(`exam_id`,`t_student_exam`.`student_id`,`t_student_exam`.`comment`,`start_time`,`end_time`,`update_time`,`create_time`) SELECT ?,`student_id`,?,?,?,?,? FROM `t_student`WHERE `class_id` in("
+	var temp string
+
+	for k, _ := range ce.ClassList {
+		if k == len(ce.ClassList)-1 {
+			temp = fmt.Sprintf("'%s'", ce.ClassList[k].ClassID)
+		} else {
+			temp = fmt.Sprintf("'%s',", ce.ClassList[k].ClassID)
+		}
+		var build strings.Builder
+		build.WriteString(pre)
+		build.WriteString(temp)
+		pre = build.String()
+	}
+	sql := fmt.Sprintf("%s%s", pre, ")")
+	fmt.Println(sql)
+
 	return db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("INSERT `t_student_exam`(`exam_id`,`t_student_exam`.`student_id`,`t_student_exam`.`comment`,`start_time`,`end_time`,`update_time`,`create_time`) "+
-			"SELECT ?,`student_id`,?,?,?,?,? "+
-			"FROM `t_student` "+
-			"WHERE `class_id`=? ",
-			ce.ExamID, ce.Comment, ce.StartTime, ce.EndTime, ce.UpdateTime, ce.CreateTime, ce.ClassID).Error; err != nil {
+		if err := tx.Exec(sql, ce.ExamID, ce.Comment, ce.StartTime, ce.EndTime, ce.UpdateTime, ce.CreateTime).Error; err != nil {
 			return err
 		}
 		return nil
 	})
+}
+
+var _ examFunc = &ExamMySQL{}
+
+func NewExamMysql() *ExamMySQL {
+	return &ExamMySQL{}
 }
