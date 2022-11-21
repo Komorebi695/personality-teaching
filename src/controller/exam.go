@@ -26,8 +26,8 @@ func SearchExam(c *gin.Context) {
 		return
 	}
 	// 获取当前登录的老师编号
-	//teacherID := c.GetString(utils.TeacherID)
-	res, err := logic.NewExamService().SearchExam(req.Text, "f28fd2db7b12")
+	teacherID := c.GetString(utils.TeacherID)
+	res, err := logic.NewExamService().SearchExam(req.Text, teacherID)
 	if err != nil {
 		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
 		logger.L.Error("search exam error: ", zap.Error(err))
