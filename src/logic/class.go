@@ -39,7 +39,7 @@ func (c *ClassService) CheckPermission(teacherID, classID string) (bool, error) 
 	return mysql.NewClassMysql().CheckTeacherClass(teacherID, classID)
 }
 
-func (c *ClassService) ClassInfoList(teacherID string, req model.ClassListReq) ([]model.Class, error) {
+func (c *ClassService) ClassInfoList(teacherID string, req model.ClassListReq) ([]model.Class, int, error) {
 	return mysql.NewClassMysql().QueryClassList(teacherID, req)
 }
 

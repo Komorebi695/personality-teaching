@@ -105,12 +105,12 @@ func ClassList(c *gin.Context) {
 		return
 	}
 	teacherID := c.GetString(utils.TeacherID)
-	classes, err := logic.NewClassService().ClassInfoList(teacherID, req)
+	classes, total, err := logic.NewClassService().ClassInfoList(teacherID, req)
 	if err != nil {
 		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("get class list error: ", zap.Error(err))
 		return
 	}
 
-	code.RespList(c, http.StatusOK, code.Success, classes, len(classes))
+	code.RespList(c, http.StatusOK, code.Success, classes, total)
 }

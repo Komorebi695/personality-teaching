@@ -75,13 +75,13 @@ func StudentsInClass(c *gin.Context) {
 		code.RespList(c, http.StatusOK, code.InvalidPermission, code.EmptyData, 0)
 		return
 	}
-	resp, err := logic.NewStudentService().GetStudentsInClass(req)
+	resp, total, err := logic.NewStudentService().GetStudentsInClass(req)
 	if err != nil {
 		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
 		return
 	}
-	code.RespList(c, http.StatusOK, code.Success, resp, len(resp))
+	code.RespList(c, http.StatusOK, code.Success, resp, total)
 }
 
 // StudentNotInClass 查询未加入班级的学生
@@ -91,7 +91,7 @@ func StudentNotInClass(c *gin.Context) {
 		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
-	resp, err := logic.NewStudentService().GetStudentsInClass(model.ClassStudentListReq{
+	resp, total, err := logic.NewStudentService().GetStudentsInClass(model.ClassStudentListReq{
 		ClassID:  utils.EmptyClassID,
 		PageNum:  req.PageNum,
 		PageSize: req.PageSize,
@@ -101,7 +101,7 @@ func StudentNotInClass(c *gin.Context) {
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
 		return
 	}
-	code.RespList(c, http.StatusOK, code.Success, resp, len(resp))
+	code.RespList(c, http.StatusOK, code.Success, resp, total)
 }
 
 func DeleteClassStudent(c *gin.Context) {

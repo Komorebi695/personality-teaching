@@ -9,7 +9,7 @@ import (
 type studentFunc interface {
 	CreateStudent(req model.CreateStudentReq) (model.CreateStudentResp, error)
 	UpdateClassID(req model.AddStudentToClassReq) (model.AddStudentClassResp, error)
-	GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error)
+	GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error)
 	RemoveStudentClass(studentID string) error
 	CheckStudentClass(studentID string, classID string) (bool, error)
 }
@@ -53,12 +53,12 @@ func (s *StudentService) UpdateClassID(req model.AddStudentToClassReq) (model.Ad
 	}, nil
 }
 
-func (s *StudentService) GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error) {
-	students, err := mysql.NewStudentMySQL().QueryStudentsInClass(req)
+func (s *StudentService) GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error) {
+	students, total, err := mysql.NewStudentMySQL().QueryStudentsInClass(req)
 	if err != nil {
-		return []model.ClassStudentListResp{}, err
+		return []model.ClassStudentListResp{}, 0, err
 	}
-	return students, nil
+	return students, total, nil
 }
 
 func (s *StudentService) RemoveStudentClass(studentID string) error {

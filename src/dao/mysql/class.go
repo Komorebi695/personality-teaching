@@ -16,7 +16,7 @@ type classFunc interface {
 	UpdateClass(m model.Class) error
 	DeleteClass(teacherID string, classID string) error
 	QueryClass(classID string) (model.Class, error)
-	QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, error)
+	QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, int, error)
 	CheckTeacherClass(teacherID string, classID string) (bool, error)
 }
 
@@ -69,17 +69,22 @@ func (c *ClassMySQL) QueryClass(classID string) (model.Class, error) {
 	return m, nil
 }
 
-func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, error) {
+func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, int, error) {
 	var classes []model.Class
+	var total int
 	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
 	err := db.Raw("select `t_class`.`class_id`,`name`,`college`,`major` from `t_class` inner join `t_teacher_class` "+
 		"on `t_class`.class_id = `t_teacher_class`.class_id "+
 		"where teacher_id = ? and `is_valid` = ? limit ?,?", teacherID, classValid, offset, count).Scan(&classes).Error
 	if err != nil {
-		return []model.Class{}, err
+		return []model.Class{}, 0, err
 	}
-	return classes, nil
+	err = db.Raw("select count(`id`) from `t_teacher_class` where `teacher_id` = ? and `is_valid` = ?", teacherID, classValid).Scan(&total).Error
+	if err != nil {
+		return []model.Class{}, 0, err
+	}
+	return classes, total, nil
 }
 
 // CheckTeacherClass 有此数据返回true

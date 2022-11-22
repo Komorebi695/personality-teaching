@@ -6,7 +6,7 @@ type studentFunc interface {
 	InsertStudent(student model.Student) error
 	UpdateClassID(studentID, classID string) error
 	QueryStudent(studentID string) (model.Student, error)
-	QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error)
+	QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error)
 	CheckStudentClass(studentID string, classID string) (bool, error)
 }
 
@@ -35,15 +35,20 @@ func (s *StudentMySQL) QueryStudent(studentID string) (model.Student, error) {
 	return m, nil
 }
 
-func (s *StudentMySQL) QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, error) {
+func (s *StudentMySQL) QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error) {
 	var students []model.ClassStudentListResp
+	var total int
 	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
 	err := db.Raw("select `student_id`,`name`,`college`,`major`,`phone_number` from `t_student` where `class_id` = ? limit ?,?", req.ClassID, offset, count).Scan(&students).Error
 	if err != nil {
-		return []model.ClassStudentListResp{}, err
+		return []model.ClassStudentListResp{}, 0, err
 	}
-	return students, nil
+	err = db.Raw("select count(`id`) from `t_student` where `class_id` = ?", req.ClassID).Scan(&total).Error
+	if err != nil {
+		return []model.ClassStudentListResp{}, 0, err
+	}
+	return students, total, nil
 }
 
 // CheckStudentClass 检查学生是否在班级中
