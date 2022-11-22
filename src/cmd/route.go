@@ -58,6 +58,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/point/detail", controller.PointDetail)
 		teacherRouter.POST("/point", controller.PointAdd)
 		teacherRouter.PUT("/point", controller.PointUpdate)
+		teacherRouter.PUT("/point/connection", controller.PointConnectionUpdate)
 	}
 
 	return router

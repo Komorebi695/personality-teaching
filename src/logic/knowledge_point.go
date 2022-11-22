@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/logger"
 	"personality-teaching/src/model"
@@ -18,6 +19,8 @@ type knowledgePointFunc interface {
 	KnowledgePointDelete(c *gin.Context, params *model.KnowledgePointDeleteInput) error
 	KnowledgePointAdd(c *gin.Context, params *model.KnowledgePointAddInput) error
 	KnowledgePointDetail(c *gin.Context, params *model.KnowledgePointDetailInput) (*mysql.KnowledgePointDetail, error)
+	KnowledgePointUpdate(c *gin.Context, params *model.KnowledgePointUpdateInput) error
+	PointConnectionUpdate(c *gin.Context, params *model.KnpConnectionUpdateInput) error
 }
 
 var _ knowledgePointFunc = &KnowledgePointService{}
@@ -173,19 +176,29 @@ func (q *KnowledgePointService) KnowledgePointDetail(c *gin.Context, params *mod
 	}
 	//获取知识点详情
 	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: params.KnpId}
+	//知识点信息
 	knowledgePointInfo, err = knowledgePointInfo.FindOneById(c, tx)
 	if err != nil {
 		logger.L.Error("`KnowledgePointDetail` -> knowledgePointInfo.FindOneById err:", zap.Error(err))
 		return nil, err
 	}
+	//知识点孩子列表
 	children, err := knowledgePointInfo.FindKnowledgeChildren(c, tx)
 	if err != nil {
 		logger.L.Error("`KnowledgePointDetail` -> knowledgePointInfo.FindKnowledgeChildren err:", zap.Error(err))
 		return nil, err
 	}
+	//知识点联系列表
+	connectionInfo := &mysql.TKnowledgeConnection{KnpId: params.KnpId}
+	connectionList, err := connectionInfo.Find(c, tx)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		logger.L.Error("`KnowledgePointDetail` -> connectionInfo.Find err:", zap.Error(err))
+		return nil, err
+	}
 	out := &mysql.KnowledgePointDetail{
-		Info:     knowledgePointInfo,
-		Children: children,
+		Info:                    knowledgePointInfo,
+		Children:                children,
+		KnowledgeConnectionList: connectionList,
 	}
 	return out, nil
 }
@@ -206,8 +219,7 @@ func (q *KnowledgePointService) KnowledgePointUpdate(c *gin.Context, params *mod
 		logger.L.Error("`KnowledgePointUpdateService` -> The knowledgePoint does not exist err:", zap.Error(err))
 		return err
 	}
-	//修改题目信息
-
+	//修改知识点信息
 	// 若父知识点为空，则默认指向自己
 	if params.ParentKnpId == "" {
 		params.ParentKnpId = params.KnpId
@@ -223,6 +235,41 @@ func (q *KnowledgePointService) KnowledgePointUpdate(c *gin.Context, params *mod
 		logger.L.Error("`KnowledgePointUpdateService` -> TKnowledgePoint.save err:", zap.Error(err))
 		return err
 	}
+	tx.Commit()
+	return nil
+}
+
+// PointConnectionUpdate 修改知识点联系
+func (q *KnowledgePointService) PointConnectionUpdate(c *gin.Context, params *model.KnpConnectionUpdateInput) error {
+	tx, err := mysql.GetGormPool()
+	if err != nil {
+		logger.L.Error("`PointConnectionUpdate Service` -> get pool err:", zap.Error(err))
+		return err
+	}
+	tx = tx.Begin()
+	//获取知识点联系列表
+	//修改知识点联系
+	//全删了，重新插入
+	connectionInfo := &mysql.TKnowledgeConnection{KnpId: params.KnpId}
+	err = connectionInfo.DeleteById(c, tx)
+	if err != nil {
+		tx.Rollback()
+		logger.L.Error("`PointConnectionUpdate Service` -> connectionInfo.DeleteById:", zap.Error(err))
+		return err
+	}
+	pKnpIdList := params.GetKnpIdByModel()
+	for _, pKnpId := range pKnpIdList {
+		Item := &mysql.TKnowledgeConnection{
+			KnpId:  params.KnpId,
+			PKnpId: pKnpId,
+		}
+		if err = Item.Save(c, tx); err != nil {
+			tx.Rollback()
+			logger.L.Error("`PointConnectionUpdate Service` -> PointConnectionUpdate.save err:", zap.Error(err))
+			return err
+		}
+	}
+
 	tx.Commit()
 	return nil
 }

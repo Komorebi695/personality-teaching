@@ -178,3 +178,31 @@ func PointUpdate(c *gin.Context) {
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
+
+// PointConnectionUpdate godoc
+// @Summary 修改知识点联系
+// @Description 修改知识点联系
+// @Tags 知识点管理
+// @ID /teacher/point/connection
+// @Accept  json
+// @Produce  json
+// @Param body body model.KnpConnectionUpdateInput true "body"
+// @Success 200 {object} code.RespMsg{data=string} "success"
+// @Router /teacher/point/connection [put]
+func PointConnectionUpdate(c *gin.Context) {
+	params := &model.KnpConnectionUpdateInput{}
+	if err := c.ShouldBind(params); err != nil {
+		logger.L.Error("Input params error:", zap.Error(err))
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	err := knowledgePointService.PointConnectionUpdate(c, params)
+	if err == gorm.ErrRecordNotFound {
+		code.CommonResp(c, http.StatusOK, code.RecordNotFound, code.EmptyData)
+		return
+	} else if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+}
