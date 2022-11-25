@@ -13,6 +13,7 @@ import (
 )
 
 const SingleChoiceQuestion = 1
+const MultipleChoiceQuestions = 2
 
 type QuestionService struct{}
 
@@ -47,7 +48,7 @@ func (q *QuestionService) QuestionListService(c *gin.Context, params *model.Ques
 	var outList []model.QuestionListItemOutput
 	for _, listItem := range list {
 		var optionList []*model.QuestionOption
-		if listItem.Type == SingleChoiceQuestion {
+		if listItem.Type == SingleChoiceQuestion || listItem.Type == MultipleChoiceQuestions {
 			contextSlice := utils.SplitContext(listItem.QuestionId, listItem.Context)
 			// 题干：contextSlice[0]	选项表JSON：contextSlice[1]
 			listItem.Context = contextSlice[0]
@@ -116,7 +117,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	//包装题目信息
 	questionId := utils.GenSnowID()
 	//若是选择题，选项内容转为JSON插入
-	if params.Type == SingleChoiceQuestion {
+	if params.Type == SingleChoiceQuestion || params.Type == MultipleChoiceQuestions {
 		//QuestionOptionList	JSON序列化
 		optionContext := utils.Obj2Json(params.QuestionOptionList)
 		//以生成的questionID后4位取前3位作为分隔符
@@ -192,7 +193,7 @@ func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.Qu
 	}
 	//若类型是选择题，获取选项结构体
 	var optionList []*model.QuestionOption
-	if questionInfo.Type == SingleChoiceQuestion {
+	if questionInfo.Type == SingleChoiceQuestion || questionInfo.Type == MultipleChoiceQuestions {
 		contextSlice := utils.SplitContext(questionInfo.QuestionId, questionInfo.Context)
 		// 题干：contextSlice[0]	选项表JSON：contextSlice[1]
 		questionInfo.Context = contextSlice[0]
@@ -238,7 +239,7 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	}
 	info := questionDetail.QuestionInfo
 	//判断题目类型是否为选择题
-	if params.Type == SingleChoiceQuestion {
+	if params.Type == SingleChoiceQuestion || params.Type == MultipleChoiceQuestions {
 		//QuestionOptionList	JSON序列化
 		optionContext := utils.Obj2Json(params.Option)
 		//以生成的questionID后3位作为分隔符
