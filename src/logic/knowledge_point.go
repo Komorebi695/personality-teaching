@@ -190,7 +190,7 @@ func (q *KnowledgePointService) KnowledgePointDetail(c *gin.Context, params *mod
 	}
 	//知识点联系列表
 	connectionInfo := &mysql.TKnowledgeConnection{KnpId: params.KnpId}
-	connectionList, err := connectionInfo.Find(c, tx)
+	connectionList, err := connectionInfo.QueryNameById(c, tx)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		logger.L.Error("`KnowledgePointDetail` -> connectionInfo.Find err:", zap.Error(err))
 		return nil, err
