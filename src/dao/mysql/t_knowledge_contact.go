@@ -48,8 +48,8 @@ func (t *TKnowledgeConnection) DeleteById(c *gin.Context, tx *gorm.DB) error {
 }
 
 // QueryNameById 返回知识点连接的前驱知识点列表
-func (t *TKnowledgeConnection) QueryNameById(c *gin.Context, tx *gorm.DB) ([]*model.KnowledgePointDetailOutput, error) {
-	var list []*model.KnowledgePointDetailOutput
+func (t *TKnowledgeConnection) QueryNameById(c *gin.Context, tx *gorm.DB) ([]*model.KnowledgeConnectionItem, error) {
+	var list []*model.KnowledgeConnectionItem
 	if err := tx.WithContext(c).Table("t_knowledge_point A ,t_knowledge_connection B").Select("A.name p_name", "B.p_knp_id").Where("A.knp_id = B.p_knp_id and B.knp_id = ?", t.KnpId).Find(&list).Error; err != nil {
 		return nil, err
 	}

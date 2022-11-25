@@ -57,7 +57,7 @@ type KnowledgePointDetailInput struct {
 	KnpId string `json:"knp_id" form:"knp_id" comment:"知识点编号" binding:"required"`
 }
 
-type KnowledgePointDetailOutput struct {
+type KnowledgeConnectionItem struct {
 	PName  string `json:"p_name" form:"p_name" comment:"前驱知识点名字" `
 	PKnpId string `json:"p_knp_id" form:"p_knp_id" comment:"前驱知识点编号"`
 }
