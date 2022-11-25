@@ -70,12 +70,12 @@ func PointOneStageList(c *gin.Context) {
 // @Summary 知识点删除（子节点全部删除后才可以删除该节点）
 // @Description 知识点删除（子节点全部删除后才可以删除该节点）
 // @Tags 知识点管理
-// @ID /teacher/pointOne
+// @ID /teacher/point_one
 // @Accept  json
 // @Produce  json
 // @Param knp_id query string true "知识点编号"
 // @Success 200 {object} code.RespMsg{data=string} "success"
-// @Router /teacher/pointOne [delete]
+// @Router /teacher/point_one [delete]
 func PointDeleteOnce(c *gin.Context) {
 	params := &model.KnowledgePointDeleteInput{}
 	if err := c.ShouldBind(params); err != nil {
