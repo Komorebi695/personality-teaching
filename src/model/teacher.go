@@ -31,3 +31,8 @@ type TeacherInfoResp struct {
 	Major       string `json:"major"`
 	PhoneNumber string `json:"phone_number"`
 }
+
+type ChangePwdReq struct {
+	NewPassword string `binding:"required" form:"new_pwd"`
+	OldPassword string `binding:"required" form:"old_pwd"`
+}

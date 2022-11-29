@@ -2,10 +2,14 @@ package logic
 
 import (
 	"encoding/json"
+	"net/http"
+	"personality-teaching/src/code"
 	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/dao/redis"
 	"personality-teaching/src/model"
 	"personality-teaching/src/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -13,7 +17,9 @@ const (
 	StudentRole int8 = 2
 )
 
-type TeacherService struct{}
+type TeacherService struct {
+	CTX *gin.Context
+}
 
 type teacherFunc interface {
 	CheckTeacherPwd(username string, password string) (string, error)
@@ -24,8 +30,10 @@ type teacherFunc interface {
 
 var _ teacherFunc = &TeacherService{}
 
-func NewTeacherService() *TeacherService {
-	return &TeacherService{}
+func NewTeacherService(c *gin.Context) *TeacherService {
+	return &TeacherService{
+		CTX: c,
+	}
 }
 
 // CheckTeacherPwd  校验通过返回teacherID，失败返回空字符串
@@ -91,4 +99,47 @@ func (*TeacherService) GetTeacherInfo(teacherID string) (model.TeacherInfoResp, 
 		Major:       t.Major,
 		PhoneNumber: t.PhoneNumber,
 	}, nil
+}
+
+func (t *TeacherService) ChangePwd(teacherID string, req model.ChangePwdReq) error {
+	teacher, err := mysql.NewTeacherMysql().QueryAllByID(teacherID)
+	if err != nil {
+		code.CommonResp(t.CTX, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return err
+	}
+	// 解析出明文密码
+	clearOldPwd, err := utils.RsaDecrypt(req.OldPassword)
+	if err != nil {
+		code.CommonResp(t.CTX, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return nil
+	}
+	// 验证旧密码是否正确
+	ok, err := utils.CompareHash(teacher.Password, string(clearOldPwd))
+	if err != nil {
+		code.CommonResp(t.CTX, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return nil
+	}
+	if !ok {
+		code.CommonResp(t.CTX, http.StatusOK, code.UnmatchedPassword, code.EmptyData)
+		return nil
+	}
+	// 解析出新密码的明文
+	clearNewPwd, err := utils.RsaDecrypt(req.NewPassword)
+	if err != nil {
+		code.CommonResp(t.CTX, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return nil
+	}
+	// 新密码加密
+	pwd, err := utils.Encryption(string(clearNewPwd))
+	if err != nil {
+		code.CommonResp(t.CTX, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return err
+	}
+	// 存储到数据库
+	if err = mysql.NewTeacherMysql().UpdatePassWord(teacherID, pwd); err != nil {
+		code.CommonResp(t.CTX, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return err
+	}
+	code.CommonResp(t.CTX, http.StatusOK, code.Success, code.EmptyData)
+	return nil
 }
