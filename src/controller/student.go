@@ -7,6 +7,7 @@ import (
 	"personality-teaching/src/logic"
 	"personality-teaching/src/model"
 	"personality-teaching/src/utils"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -127,4 +128,45 @@ func DeleteClassStudent(c *gin.Context) {
 		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+}
+
+func StudentLogin(c *gin.Context) {
+	var req model.LoginReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	// 解析密码明文
+	plaintext, err := utils.RsaDecrypt(req.Password)
+	if err != nil {
+		code.CommonResp(c, http.StatusOK, code.WrongPassword, code.EmptyData)
+		return
+	}
+	req.Password = string(plaintext)
+
+	studentService := logic.NewStudentService(c)
+	studentID, err := studentService.CheckPwd(req)
+	if err != nil {
+		logger.L.Error("student login error :", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	if studentID == "" {
+		code.CommonResp(c, http.StatusOK, code.WrongPassword, code.EmptyData)
+		return
+	}
+	//  登录成功，生成session并存储至Redis
+	session := model.SessionValue{
+		UserID:     studentID,
+		RoleType:   logic.StudentRole,
+		CreateTime: time.Now().Unix(),
+	}
+	sessionKey, err := logic.NewTeacherService(c).StoreSession(session)
+	if err != nil {
+		logger.L.Error("teacher service StoreSession error :", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	c.SetCookie(utils.SessionKey, sessionKey, 0, "", "", false, false)
+	code.CommonResp(c, http.StatusOK, code.Success, studentID)
 }

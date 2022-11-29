@@ -19,6 +19,7 @@ type studentFunc interface {
 	RemoveStudentClass(studentID string) error
 	CheckStudentClass(studentID string, classID string) (bool, error)
 	CheckStudentPermission(sessionKey string) (string, error)
+	CheckPwd(req model.LoginReq) (string, error)
 }
 
 var _ studentFunc = &StudentService{}
@@ -144,4 +145,16 @@ func (s *StudentService) ChangePwd(studentID string, req model.ChangePwdReq) err
 	}
 	code.CommonResp(s.CTX, http.StatusOK, code.Success, code.EmptyData)
 	return nil
+}
+
+func (s *StudentService) CheckPwd(req model.LoginReq) (string, error) {
+	student, err := mysql.NewStudentMySQL().QueryAllByName(req.UserName)
+	if err != nil || student.StudentID == "" {
+		return "", err
+	}
+	ok, err := utils.CompareHash(student.Password, req.Password)
+	if err != nil || !ok {
+		return "", err
+	}
+	return student.StudentID, nil
 }

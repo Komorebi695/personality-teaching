@@ -61,5 +61,12 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.PUT("/point", controller.PointUpdate)
 	}
 
+	studentRouter := router.Group("/student")
+	// 学生登录
+	studentRouter.POST("/login", controller.StudentLogin)
+	studentRouter.Use(middle.VerifyStudent)
+	{
+
+	}
 	return router
 }

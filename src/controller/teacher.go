@@ -15,7 +15,7 @@ import (
 )
 
 func TeacherLogin(c *gin.Context) {
-	req := model.TeacherLoginReq{}
+	req := model.LoginReq{}
 	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return

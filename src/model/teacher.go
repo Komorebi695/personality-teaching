@@ -13,7 +13,7 @@ func (t Teacher) TableName() string {
 	return "t_teacher"
 }
 
-type TeacherLoginReq struct {
+type LoginReq struct {
 	UserName string `binding:"required,min=1,max=20" form:"username"`
 	Password string `binding:"required,min=1" form:"password"`
 }
