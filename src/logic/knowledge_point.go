@@ -95,8 +95,8 @@ func (q *KnowledgePointService) KnowledgePointOneStageList(c *gin.Context) (*mod
 	return out, nil
 }
 
-// KnowledgePointDelete 知识点删除
-func (q *KnowledgePointService) KnowledgePointDelete(c *gin.Context, params *model.KnowledgePointDeleteInput) error {
+// KnowledgePointDeleteOnce 知识点删除（子节点全部删除后才可以删除该节点）
+func (q *KnowledgePointService) KnowledgePointDeleteOnce(c *gin.Context, params *model.KnowledgePointDeleteInput) error {
 	tx, err := mysql.GetGormPool()
 	if err != nil {
 		logger.L.Error("`KnowledgePointDelete` -> get pool err:", zap.Error(err))
@@ -124,6 +124,53 @@ func (q *KnowledgePointService) KnowledgePointDelete(c *gin.Context, params *mod
 	err = knowledgePointInfo.Delete(c, tx)
 	if err != nil {
 		logger.L.Error("`KnowledgePointDelete` -> TKnowledgePoint.Delete err:", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+// KnowledgePointDelete 知识点删除
+func (q *KnowledgePointService) KnowledgePointDelete(c *gin.Context, params *model.KnowledgePointDeleteInput) error {
+	tx, err := mysql.GetGormPool()
+	if err != nil {
+		logger.L.Error("`KnowledgePointDelete` -> get pool err:", zap.Error(err))
+		return err
+	}
+	err = deleteKnpAndChild(c, tx, params.KnpId)
+	if err != nil {
+		logger.L.Error("`KnowledgePointDelete` -> TKnowledgePoint.deleteKnpAndChild err:", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func deleteKnpAndChild(c *gin.Context, tx *gorm.DB, knpId string) error {
+	//查询基本信息
+	knowledgePointInfo := &mysql.TKnowledgePoint{KnpId: knpId}
+	knowledgePointInfo, err := knowledgePointInfo.FindOneById(c, tx)
+	if err != nil {
+		logger.L.Error("`deleteKnpAndChild` -> TKnowledgePoint.FindOneById err:", zap.Error(err))
+		return err
+	}
+	//查询该知识点是否存在子知识点
+	children, err := knowledgePointInfo.FindKnowledgeChildren(c, tx)
+	if err != nil {
+		logger.L.Error("`deleteKnpAndChild` -> knowledgePointInfo.FindKnowledgeChildren err:", zap.Error(err))
+		return err
+	}
+	// 若存在子知识点，遍历删除
+	if len(children) != 0 {
+		for _, child := range children {
+			err := deleteKnpAndChild(c, tx, child.KnpId)
+			if err != nil {
+				logger.L.Error("`deleteKnpAndChild` -> deleteKnpAndChild.Delete Child err:", zap.Error(err))
+				return err
+			}
+		}
+	}
+	err = knowledgePointInfo.Delete(c, tx)
+	if err != nil {
+		logger.L.Error("`deleteKnpAndChild` -> deleteKnpAndChild.Delete Knp err:", zap.Error(err))
 		return err
 	}
 	return nil
@@ -190,7 +237,7 @@ func (q *KnowledgePointService) KnowledgePointDetail(c *gin.Context, params *mod
 	}
 	//知识点联系列表
 	connectionInfo := &mysql.TKnowledgeConnection{KnpId: params.KnpId}
-	connectionList, err := connectionInfo.Find(c, tx)
+	connectionList, err := connectionInfo.QueryNameById(c, tx)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		logger.L.Error("`KnowledgePointDetail` -> connectionInfo.Find err:", zap.Error(err))
 		return nil, err

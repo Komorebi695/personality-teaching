@@ -54,6 +54,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		//知识点管理
 		teacherRouter.GET("/point/list", controller.PointList)
 		teacherRouter.GET("/point/list/one_stage", controller.PointOneStageList)
+		teacherRouter.DELETE("/point_one", controller.PointDeleteOnce)
 		teacherRouter.DELETE("/point", controller.PointDelete)
 		teacherRouter.GET("/point/detail", controller.PointDetail)
 		teacherRouter.POST("/point", controller.PointAdd)
