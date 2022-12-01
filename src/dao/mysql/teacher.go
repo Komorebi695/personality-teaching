@@ -1,6 +1,8 @@
 package mysql
 
-import "personality-teaching/src/model"
+import (
+	"personality-teaching/src/model"
+)
 
 type TeacherMySQL struct {
 }
@@ -26,4 +28,8 @@ func (t *TeacherMySQL) QueryAllByID(teacherID string) (model.Teacher, error) {
 	md := model.Teacher{}
 	err := db.Raw("select `teacher_id`,`password`,`name`,`college`,`major`,`phone_number` from `t_teacher` where `teacher_id` = ? limit 1", teacherID).Scan(&md).Error
 	return md, err
+}
+
+func (t *TeacherMySQL) UpdatePassWord(teacherID string, newPwd string) error {
+	return db.Exec("update `t_teacher` set  `password` = ? where `teacher_id` = ?", newPwd, teacherID).Error
 }

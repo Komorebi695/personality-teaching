@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"personality-teaching/src/controller"
 	"personality-teaching/src/middle"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
@@ -11,7 +12,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router.Use(middlewares...)
 	// 这个可以这样-> "/项目前缀/teacher/login"
 	router.POST("/teacher/login", controller.TeacherLogin)
-
+	router.PUT("/pwd", middle.VerifyAny, middle.ChangePassword)
 	//项目前缀可以加在teacher前面，即 -> router.Group("/项目前缀/teacher")
 	//开启登录认证,以下接口需要认证成功才能访问
 	teacherRouter := router.Group("/teacher")
@@ -62,5 +63,12 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.PUT("/point/connection", controller.PointConnectionUpdate)
 	}
 
+	studentRouter := router.Group("/student")
+	// 学生登录
+	studentRouter.POST("/login", controller.StudentLogin)
+	studentRouter.Use(middle.VerifyStudent)
+	{
+
+	}
 	return router
 }

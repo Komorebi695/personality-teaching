@@ -7,6 +7,7 @@ import (
 	"personality-teaching/src/logic"
 	"personality-teaching/src/model"
 	"personality-teaching/src/utils"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -20,7 +21,7 @@ func CreateStudent(c *gin.Context) {
 		return
 	}
 
-	resp, err := logic.NewStudentService().CreateStudent(req)
+	resp, err := logic.NewStudentService(c).CreateStudent(req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("CreateStudent error: ", zap.Error(err))
@@ -48,7 +49,7 @@ func AddStudentToClass(c *gin.Context) {
 		return
 	}
 	// 将学生加入班级
-	resp, err := logic.NewStudentService().UpdateClassID(req)
+	resp, err := logic.NewStudentService(c).UpdateClassID(req)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("UpdateClassID error: ", zap.Error(err))
@@ -75,7 +76,7 @@ func StudentsInClass(c *gin.Context) {
 		code.RespList(c, http.StatusOK, code.InvalidPermission, code.EmptyData, 0)
 		return
 	}
-	resp, total, err := logic.NewStudentService().GetStudentsInClass(req)
+	resp, total, err := logic.NewStudentService(c).GetStudentsInClass(req)
 	if err != nil {
 		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
@@ -91,7 +92,7 @@ func StudentNotInClass(c *gin.Context) {
 		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
-	resp, total, err := logic.NewStudentService().GetStudentsInClass(model.ClassStudentListReq{
+	resp, total, err := logic.NewStudentService(c).GetStudentsInClass(model.ClassStudentListReq{
 		ClassID:  utils.EmptyClassID,
 		PageNum:  req.PageNum,
 		PageSize: req.PageSize,
@@ -111,7 +112,7 @@ func DeleteClassStudent(c *gin.Context) {
 		return
 	}
 	// 校验班级学生关系
-	ok, err := logic.NewStudentService().CheckStudentClass(req.StudentID, req.ClassID)
+	ok, err := logic.NewStudentService(c).CheckStudentClass(req.StudentID, req.ClassID)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("CheckStudentClass error: ", zap.Error(err))
@@ -121,10 +122,51 @@ func DeleteClassStudent(c *gin.Context) {
 		code.CommonResp(c, http.StatusOK, code.NotInClass, code.EmptyData)
 		return
 	}
-	if err = logic.NewStudentService().RemoveStudentClass(req.StudentID); err != nil {
+	if err = logic.NewStudentService(c).RemoveStudentClass(req.StudentID); err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("RemoveStudentClass error: ", zap.Error(err))
 		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+}
+
+func StudentLogin(c *gin.Context) {
+	var req model.LoginReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	// 解析密码明文
+	plaintext, err := utils.RsaDecrypt(req.Password)
+	if err != nil {
+		code.CommonResp(c, http.StatusOK, code.WrongPassword, code.EmptyData)
+		return
+	}
+	req.Password = string(plaintext)
+
+	studentService := logic.NewStudentService(c)
+	studentID, err := studentService.CheckPwd(req)
+	if err != nil {
+		logger.L.Error("student login error :", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	if studentID == "" {
+		code.CommonResp(c, http.StatusOK, code.WrongPassword, code.EmptyData)
+		return
+	}
+	//  登录成功，生成session并存储至Redis
+	session := model.SessionValue{
+		UserID:     studentID,
+		RoleType:   logic.StudentRole,
+		CreateTime: time.Now().Unix(),
+	}
+	sessionKey, err := logic.NewTeacherService(c).StoreSession(session)
+	if err != nil {
+		logger.L.Error("teacher service StoreSession error :", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	c.SetCookie(utils.SessionKey, sessionKey, 0, "", "", false, false)
+	code.CommonResp(c, http.StatusOK, code.Success, studentID)
 }

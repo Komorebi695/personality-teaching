@@ -15,7 +15,7 @@ import (
 )
 
 func TeacherLogin(c *gin.Context) {
-	req := model.TeacherLoginReq{}
+	req := model.LoginReq{}
 	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
 		return
@@ -29,7 +29,7 @@ func TeacherLogin(c *gin.Context) {
 	}
 	req.Password = string(plaintext)
 
-	teacherService := logic.NewTeacherService()
+	teacherService := logic.NewTeacherService(c)
 	teacherID, err := teacherService.CheckTeacherPwd(req.UserName, req.Password)
 	if err != nil {
 		logger.L.Error("teacher service QueryAllInfo error :", zap.Error(err))
@@ -59,7 +59,7 @@ func TeacherLogin(c *gin.Context) {
 func TeacherInfo(c *gin.Context) {
 	teacherID := c.GetString(utils.TeacherID)
 
-	resp, err := logic.NewTeacherService().GetTeacherInfo(teacherID)
+	resp, err := logic.NewTeacherService(c).GetTeacherInfo(teacherID)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("GetTeacherInfo error: ", zap.Error(err))

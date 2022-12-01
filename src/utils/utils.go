@@ -51,6 +51,8 @@ const (
 	DefaultPassWord       = "123456"
 	SessionKey            = "session_key"
 	TeacherID             = "teacher"
+	StudentID             = "student"
+	Role                  = "role"
 )
 
 // GenSnowID 生成ID时会上锁，确保不重复

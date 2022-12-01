@@ -1,6 +1,8 @@
 package mysql
 
-import "personality-teaching/src/model"
+import (
+	"personality-teaching/src/model"
+)
 
 type studentFunc interface {
 	InsertStudent(student model.Student) error
@@ -8,6 +10,8 @@ type studentFunc interface {
 	QueryStudent(studentID string) (model.Student, error)
 	QueryStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error)
 	CheckStudentClass(studentID string, classID string) (bool, error)
+	UpdatePassWord(studentID string, newPwd string) error
+	QueryAllByName(name string) (model.Student, error)
 }
 
 var _ studentFunc = &StudentMySQL{}
@@ -59,4 +63,17 @@ func (s *StudentMySQL) CheckStudentClass(studentID string, classID string) (bool
 		return false, err
 	}
 	return id != -1, nil
+}
+
+func (s *StudentMySQL) UpdatePassWord(studentID string, newPwd string) error {
+	return db.Exec("update `t_student` set `password` = ? where `student_id` = ?", newPwd, studentID).Error
+}
+
+func (s *StudentMySQL) QueryAllByName(name string) (model.Student, error) {
+	var m model.Student
+	err := db.Raw("select `student_id`,`name`,`password`,`college`,`major`,`class_id`,`phone_number` from `t_student` where `name` = ? limit 1", name).Scan(&m).Error
+	if err != nil {
+		return model.Student{}, err
+	}
+	return m, nil
 }
