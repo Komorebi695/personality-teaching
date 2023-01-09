@@ -52,7 +52,7 @@ func PointList(c *gin.Context) {
 // @ID /teacher/point/list/one_stage
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} code.RespMsg{data=model.KnowledgePointOneStageListOutput} "success"
+// @Success 200 {object} code.RespMsg{data=model.KnpOneStageListOutput} "success"
 // @Router /teacher/point/list/one_stage [get]
 func PointOneStageList(c *gin.Context) {
 	out, err := knowledgePointService.KnowledgePointOneStageList(c)
@@ -64,38 +64,6 @@ func PointOneStageList(c *gin.Context) {
 		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, out)
-}
-
-// PointDeleteOnce godoc
-// @Summary 知识点删除（子节点全部删除后才可以删除该节点）
-// @Description 知识点删除（子节点全部删除后才可以删除该节点）
-// @Tags 知识点管理
-// @ID /teacher/point_one
-// @Accept  json
-// @Produce  json
-// @Param knp_id query string true "知识点编号"
-// @Success 200 {object} code.RespMsg{data=string} "success"
-// @Router /teacher/point_one [delete]
-func PointDeleteOnce(c *gin.Context) {
-	params := &model.KnowledgePointDeleteInput{}
-	if err := c.ShouldBind(params); err != nil {
-		logger.L.Error("Input params error:", zap.Error(err))
-		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
-		return
-	}
-	err := knowledgePointService.KnowledgePointDeleteOnce(c, params)
-	if err == gorm.ErrRecordNotFound {
-		code.CommonResp(c, http.StatusOK, code.RecordNotFound, code.EmptyData)
-		return
-	} else if err != nil {
-		if err.Error() == errors.New("child node exists err").Error() {
-			code.CommonResp(c, http.StatusOK, code.ChildExit, code.EmptyData)
-			return
-		}
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
-		return
-	}
-	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
 
 // PointDelete godoc

@@ -15,20 +15,26 @@ import (
 const SingleChoiceQuestion = 1
 const MultipleChoiceQuestions = 2
 
-type QuestionService struct{}
+type QuestionService struct {
+	knpQuestionArticle *mysql.KnowledgePointQuestionMySQL
+	questionArticle    *mysql.QuestionMySQL
+}
 
 type questionFunc interface {
 	QuestionListService(c *gin.Context, params *model.QuestionListInput) (*model.QuestionListOutput, error)
 	QuestionDeleteService(c *gin.Context, params *model.QuestionDeleteInput) error
 	QuestionAddService(c *gin.Context, params *model.QuestionAddInput) error
-	QuestionDetailService(c *gin.Context, params *model.QuestionDetailInput) (*mysql.QuestionDetail, error)
+	QuestionDetailService(c *gin.Context, params *model.QuestionDetailInput) (*model.QuestionDetail, error)
 	QuestionUpdateService(c *gin.Context, params *model.QuestionUpdateInput) error
 }
 
 var _ questionFunc = &QuestionService{}
 
 func NewQuestionService() *QuestionService {
-	return &QuestionService{}
+	return &QuestionService{
+		knpQuestionArticle: mysql.NewKnowledgePointQuestionMySQL(),
+		questionArticle:    mysql.NewQuestionMySQL(),
+	}
 }
 
 func (q *QuestionService) QuestionListService(c *gin.Context, params *model.QuestionListInput) (*model.QuestionListOutput, error) {
@@ -38,8 +44,7 @@ func (q *QuestionService) QuestionListService(c *gin.Context, params *model.Ques
 		return nil, err
 	}
 	//从db中分页读取基本信息
-	questionInfo := &mysql.TQuestion{}
-	list, total, err := questionInfo.PageList(c, tx, params)
+	list, total, err := q.questionArticle.PageList(c, tx, params)
 	if err != nil {
 		logger.L.Error("`QuestionListService` -> questionInfo.PageList err:", zap.Error(err))
 		return nil, err
@@ -86,15 +91,13 @@ func (q *QuestionService) QuestionDeleteService(c *gin.Context, params *model.Qu
 		return err
 	}
 	//读取基本信息
-	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.FindOnce(c, tx)
+	questionInfo, err := q.questionArticle.FindOnce(c, tx, params.QuestionId)
 	if err != nil {
-		logger.L.Error("`QuestionDeleteService` -> TQuestion.FindOneById err:", zap.Error(err))
+		logger.L.Error("`QuestionDeleteService` -> Question.FindOneById err:", zap.Error(err))
 		return err
 	}
-	questionInfo.IsDelete = 1
-	if err = questionInfo.Save(c, tx); err != nil {
-		logger.L.Error("`QuestionDeleteService` -> TQuestion.Save err:", zap.Error(err))
+	if err = q.questionArticle.Delete(c, tx, questionInfo.ID); err != nil {
+		logger.L.Error("`QuestionDeleteService` -> Question.Save err:", zap.Error(err))
 		return err
 	}
 	return nil
@@ -108,8 +111,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	}
 	tx = tx.Begin()
 	//判断题目是否重复插入
-	questionInfo := &mysql.TQuestion{Name: params.QuestionName}
-	if _, err = questionInfo.FindOnce(c, tx); err == nil {
+	if _, err = q.questionArticle.FindOnce(c, tx, params.QuestionName); err == nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionAddService` -> The problem's name already exists:", zap.Error(err))
 		return err
@@ -126,7 +128,7 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 		params.Context = params.Context + splitNum + optionContext
 	}
 
-	questionModel := &mysql.TQuestion{
+	questionModel := &model.Question{
 		//使用雪花ID生成
 		QuestionId: questionId,
 		Name:       params.QuestionName,
@@ -135,9 +137,8 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 		Context:    params.Context,
 		Answer:     params.Answer,
 		CreateUser: params.CreateUser,
-		IsDelete:   0,
 	}
-	if err = questionModel.Save(c, tx); err != nil {
+	if err = q.questionArticle.Save(c, tx, questionModel); err != nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionAddService` -> questionModel.Save err:", zap.Error(err))
 		return err
@@ -146,11 +147,11 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	//循环依次插入知识点题目关联表
 	knpIdList := params.GetKnpIdByModel()
 	for _, s := range knpIdList {
-		knowledgePointQuestion := &mysql.TKnowledgePointQuestion{
+		knowledgePointQuestion := &model.KnowledgePointQuestion{
 			KnpId:      s,
 			QuestionId: questionModel.QuestionId,
 		}
-		if err = knowledgePointQuestion.Save(c, tx); err != nil {
+		if err = q.knpQuestionArticle.Save(c, tx, knowledgePointQuestion); err != nil {
 			tx.Rollback()
 			logger.L.Error("`QuestionAddService` -> knowledgePointQuestion.Save err:", zap.Error(err))
 			return err
@@ -160,31 +161,30 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 	return nil
 }
 
-func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.QuestionDetailInput) (*mysql.QuestionDetail, error) {
+func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.QuestionDetailInput) (*model.QuestionDetail, error) {
 	tx, err := mysql.GetGormPool()
 	if err != nil {
 		logger.L.Error("`QuestionDetailService` -> get pool err:", zap.Error(err))
 		return nil, err
 	}
 	//获取问题详情
-	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.FindOnce(c, tx)
+	questionInfo, err := q.questionArticle.FindOnce(c, tx, params.QuestionId)
 	if err != nil {
-		logger.L.Error("`QuestionDetailService` -> questionInfo.FindOneById err:", zap.Error(err))
+		if err != gorm.ErrRecordNotFound {
+			logger.L.Error("`QuestionDetailService` -> questionInfo.FindOneById err:", zap.Error(err))
+		}
 		return nil, err
 	}
 	//题目对应的知识点编号表
-	questionPointSearch := &mysql.TKnowledgePointQuestion{QuestionId: questionInfo.QuestionId}
-	questionPointList, err := questionPointSearch.Find(c, tx, questionPointSearch)
+	questionPointList, err := q.knpQuestionArticle.Find(c, tx, questionInfo.QuestionId)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		logger.L.Error("`QuestionDetailService` -> TKnowledgePointQuestion.FindOneById err:", zap.Error(err))
+		logger.L.Error("`QuestionDetailService` -> KnowledgePointQuestion.FindOneById err:", zap.Error(err))
 		return nil, err
 	}
 	//根据编号表查询知识点列表
-	var knowledgePointList []*mysql.TKnowledgePoint
+	var knowledgePointList []*model.KnowledgePoint
 	for _, point := range questionPointList {
-		pointSearch := &mysql.TKnowledgePoint{KnpId: point.KnpId}
-		pointSearch, err = pointSearch.FindOneById(c, tx)
+		pointSearch, err := mysql.NewKnowledgePointMySQL().FindOneById(c, tx, point.KnpId)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			logger.L.Error("`QuestionDetailService` -> TKnowledgePoint.FindOneById err:", zap.Error(err))
 			return nil, err
@@ -207,11 +207,10 @@ func (q *QuestionService) QuestionDetailService(c *gin.Context, params *model.Qu
 
 	}
 
-	detail := &mysql.QuestionDetail{
-		QuestionInfo:               questionInfo,
-		QuestionOption:             optionList,
-		KnowledgePointQuestionList: questionPointList,
-		KnowledgePointList:         knowledgePointList,
+	detail := &model.QuestionDetail{
+		QuestionInfo:       questionInfo,
+		QuestionOption:     optionList,
+		KnowledgePointList: knowledgePointList,
 	}
 	return detail, nil
 }
@@ -224,8 +223,7 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	}
 	tx = tx.Begin()
 	//获取问题详情
-	questionInfo := &mysql.TQuestion{QuestionId: params.QuestionId}
-	questionInfo, err = questionInfo.FindOnce(c, tx)
+	questionInfo, err := q.questionArticle.FindOnce(c, tx, params.QuestionId)
 	if err != nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionUpdateService` -> The problem does not exist err:", zap.Error(err))
@@ -255,16 +253,14 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	info.Type = params.Type
 	info.CreateUser = params.CreateUser
 	info.UpdatedAt = time.Now()
-	if err = info.Save(c, tx); err != nil {
+	if err = q.questionArticle.Save(c, tx, info); err != nil {
 		tx.Rollback()
-		logger.L.Error("`QuestionUpdateService` -> TQuestion.add err:", zap.Error(err))
+		logger.L.Error("`QuestionUpdateService` -> Question.add err:", zap.Error(err))
 		return err
 	}
-
 	//修改问题对应知识点编号
 	//删除关联
-	oldKnowledgeQuestion := &mysql.TKnowledgePointQuestion{QuestionId: params.QuestionId}
-	if err = oldKnowledgeQuestion.DeleteById(c, tx); err != nil {
+	if err = q.knpQuestionArticle.DeleteAllById(c, tx, params.QuestionId); err != nil {
 		tx.Rollback()
 		logger.L.Error("`QuestionUpdateService` -> oldKnowledgeQuestion.Delete err:", zap.Error(err))
 		return err
@@ -272,14 +268,13 @@ func (q *QuestionService) QuestionUpdateService(c *gin.Context, params *model.Qu
 	//重新插入
 	knpIdList := params.GetKnpIdByModel()
 	for _, knp := range knpIdList {
-		pointQuestions := &mysql.TKnowledgePointQuestion{QuestionId: params.QuestionId, KnpId: knp}
-		if err = pointQuestions.Save(c, tx); err != nil {
+		pointQuestions := &model.KnowledgePointQuestion{QuestionId: params.QuestionId, KnpId: knp}
+		if err = q.knpQuestionArticle.Save(c, tx, pointQuestions); err != nil {
 			tx.Rollback()
-			logger.L.Error("`QuestionUpdateService` -> TKnowledgePointQuestion.Save err:", zap.Error(err))
+			logger.L.Error("`QuestionUpdateService` -> KnowledgePointQuestion.Save err:", zap.Error(err))
 			return err
 		}
 	}
-
 	tx.Commit()
 	return nil
 }

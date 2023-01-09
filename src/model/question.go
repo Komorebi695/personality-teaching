@@ -2,7 +2,29 @@ package model
 
 import (
 	"strings"
+	"time"
 )
+
+// Question 题目表
+type Question struct {
+	ID         int64     `json:"id" gorm:"primary_key" description:"自增主键"`
+	QuestionId string    `json:"question_id" gorm:"column:question_id" description:"题目Id"`
+	Name       string    `json:"name" gorm:"column:name" description:"题目名称"`
+	Level      int       `json:"level" gorm:"column:level" description:"困难程度，1：容易，2：中等，3：困难"`
+	Type       int       `json:"type" gorm:"column:type" description:"题目类型，1：选择题，2：填空题，3：问答题"`
+	Context    string    `json:"context" gorm:"column:context" description:"题目内容"`
+	Answer     string    `json:"answer" gorm:"column:answer" description:"题目答案"`
+	CreateUser string    `json:"create_user" gorm:"column:create_user" description:"录入者"`
+	UpdatedAt  time.Time `json:"update_time" gorm:"column:update_time;default:null" description:"修改时间"`
+	CreatedAt  time.Time `json:"create_time" gorm:"column:create_time;default:null" description:"创建时间"`
+}
+
+// QuestionDetail 题目详细
+type QuestionDetail struct {
+	QuestionInfo       *Question         `json:"problem_info" description:"题目信息"`
+	QuestionOption     []*QuestionOption `json:"question_option" comment:"选项信息"`
+	KnowledgePointList []*KnowledgePoint `json:"knowledge_point_list" description:"知识点列表"`
+}
 
 // QuestionListInput 题目列表输入
 type QuestionListInput struct {
