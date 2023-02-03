@@ -156,9 +156,11 @@ func (t *KnowledgePointService) KnowledgePointAdd(c *gin.Context, params *model.
 			KnpId:       knpId,
 			ParentKnpId: params.ParentKnpId,
 		},
-		Name:       params.Name,
-		Level:      params.Level,
-		Context:    params.Context,
+		KnowledgePointInfo: model.KnowledgePointInfo{
+			Name:    params.Name,
+			Level:   params.Level,
+			Context: params.Context,
+		},
 		CreateUser: params.CreateUser,
 	}
 	if err = t.knpArticle.Save(c, tx, knowledgePointModel); err != nil {

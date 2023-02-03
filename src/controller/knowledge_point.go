@@ -131,7 +131,7 @@ func PointAdd(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param knp_id query string true "知识点编号"
-// @Success 200 {object} code.RespMsg{data=mysql.KnowledgePointDetail} "success"
+// @Success 200 {object} code.RespMsg{data=model.KnowledgePointDetail} "success"
 // @Router /teacher/point/detail [get]
 func PointDetail(c *gin.Context) {
 	params := &model.KnowledgePointDetailInput{}

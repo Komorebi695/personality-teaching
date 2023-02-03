@@ -107,7 +107,7 @@ func QuestionAdd(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param question_id query string true "题目ID"
-// @Success 200 {object} code.RespMsg{data=mysql.QuestionDetail} "success"
+// @Success 200 {object} code.RespMsg{data=model.QuestionDetail} "success"
 // @Router /teacher/question/detail [get]
 func QuestionDetail(c *gin.Context) {
 	params := &model.QuestionDetailInput{}
