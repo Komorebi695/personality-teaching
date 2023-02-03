@@ -7,6 +7,7 @@ import (
 )
 
 type knowledgePointQuestionFunc interface {
+	FindByKnpId(c *gin.Context, tx *gorm.DB, knpId string) ([]*model.KnowledgePointQuestion, error)
 	Find(c *gin.Context, tx *gorm.DB, questionId string) ([]*model.KnowledgePointQuestion, error)
 	Save(c *gin.Context, tx *gorm.DB, param *model.KnowledgePointQuestion) error
 	Delete(c *gin.Context, tx *gorm.DB, id int64) error
@@ -29,6 +30,16 @@ func (t *KnowledgePointQuestionMySQL) TableName() string {
 func (t *KnowledgePointQuestionMySQL) Find(c *gin.Context, tx *gorm.DB, questionId string) ([]*model.KnowledgePointQuestion, error) {
 	var list []*model.KnowledgePointQuestion
 	err := tx.WithContext(c).Table(t.TableName()).Where("question_id = ?", questionId).Find(&list).Error
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+// FindByKnpId 根据knpId查找对应questionId列表
+func (t *KnowledgePointQuestionMySQL) FindByKnpId(c *gin.Context, tx *gorm.DB, knpId string) ([]*model.KnowledgePointQuestion, error) {
+	var list []*model.KnowledgePointQuestion
+	err := tx.WithContext(c).Select("question_id").Table(t.TableName()).Where("knp_id = ?", knpId).Find(&list).Error
 	if err != nil {
 		return nil, err
 	}

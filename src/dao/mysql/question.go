@@ -50,6 +50,9 @@ func (q *QuestionMySQL) PageList(c *gin.Context, tx *gorm.DB, param *model.Quest
 	if param.Level != 0 {
 		query = query.Where("(level = ?)", param.Level)
 	}
+	if param.KnpId != "" {
+		query = query.Joins("inner join "+"t_knowledge_point_question"+" tkpq on t_question.question_id = tkpq.question_id").Where("tkpq.knp_id = ?", param.KnpId)
+	}
 
 	query.Limit(param.PageSize).Offset(-1).Count(&total)
 	if err := query.Limit(param.PageSize).Offset(offset).Order("id asc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {

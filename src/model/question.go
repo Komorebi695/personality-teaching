@@ -42,6 +42,7 @@ type QuestionListInput struct {
 	Context  string `json:"context" form:"context" comment:"关键词"`
 	Type     int    `json:"type" form:"type" comment:"题目类型，1：单选题，2：多选题，3：填空题，4：问答题"`
 	Level    int    `json:"level" form:"level" comment:"困难程度，1：容易，2：中等，3：困难"`
+	KnpId    string `json:"knp_id" form:"knp_id" comment:"知识点Id"`
 	PageNo   int    `json:"page_no" form:"page_no" comment:"页数" example:"1" binding:"required"`
 	PageSize int    `json:"page_size" form:"page_size" comment:"每页条数" example:"20" binding:"required"`
 }

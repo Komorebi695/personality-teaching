@@ -23,6 +23,7 @@ var questionService = logic.NewQuestionService()
 // @Param context query string false "题目关键词"
 // @Param type query int false "题目类型"
 // @Param level query int false "困难程度"
+// @Param knp_id query string false "知识点id"
 // @Param page_size query int true "每页个数"
 // @Param page_no query int true "当前页数"
 // @Success 200 {object} code.RespMsg{data=model.QuestionListOutput} "success"
@@ -43,6 +44,7 @@ func QuestionList(c *gin.Context) {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		return
 	}
+
 	code.CommonResp(c, http.StatusOK, code.Success, out)
 }
 

@@ -54,6 +54,7 @@ func (q *QuestionService) QuestionListService(c *gin.Context, params *model.Ques
 	//格式化输出信息
 	var outList []model.QuestionListItemOutput
 	for _, listItem := range list {
+
 		//拆分问题选项和问题内容
 		context, optionList, err := OptionSpit(listItem)
 		if err != nil {
