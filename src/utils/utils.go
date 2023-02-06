@@ -118,18 +118,27 @@ func CurrentTime() string {
 }
 
 // SplitNum 截取questionId作为选项与题目的分隔字段
-func SplitNum(s string) string {
-	return s[low:high]
+func SplitNum(s string) (string, error) {
+	if int64(len(s)) < low || int64(len(s)) < high {
+		return "", errors.New("len mismatch")
+	}
+	return s[low:high], nil
 }
 
 // SplitContext 根据题目的分隔字段 分离题干和选项
-func SplitContext(id, s string) []string {
-	splitNum := SplitNum(id)
-	return strings.Split(s, splitNum)
+func SplitContext(id, s string) ([]string, error) {
+	splitNum, err := SplitNum(id)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(s, splitNum), nil
 }
 
 // Obj2Json JSON转换
-func Obj2Json(s interface{}) string {
-	marshal, _ := json.Marshal(s)
-	return string(marshal)
+func Obj2Json(s interface{}) (string, error) {
+	marshal, err := json.Marshal(s)
+	if err != nil {
+		return "", err
+	}
+	return string(marshal), nil
 }
