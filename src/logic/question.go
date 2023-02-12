@@ -113,12 +113,12 @@ func (q *QuestionService) QuestionAddService(c *gin.Context, params *model.Quest
 		return err
 	}
 	tx = tx.Begin()
-	//判断题目是否重复插入
-	if _, err = q.questionArticle.FindOnce(c, tx, params.QuestionBase.Name); err == nil {
-		tx.Rollback()
-		logger.L.Error("`QuestionAddService` -> The problem's name already exists:", zap.Error(err))
-		return err
-	}
+	////判断题目是否重复插入
+	//if _, err = q.questionArticle.FindOnce(c, tx, params.QuestionBase.Name); err == nil {
+	//	tx.Rollback()
+	//	logger.L.Error("`QuestionAddService` -> The problem's name already exists:", zap.Error(err))
+	//	return errors.New("the problem's name already exists")
+	//}
 	//包装题目信息
 	//使用雪花ID生成questionId
 	questionId := utils.GenSnowID()
