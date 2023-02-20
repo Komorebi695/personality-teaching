@@ -114,3 +114,23 @@ func ClassList(c *gin.Context) {
 
 	code.RespList(c, http.StatusOK, code.Success, classes, total)
 }
+
+// ClassNameCheck 检查班级名是否存在
+func ClassNameCheck(c *gin.Context) {
+	var req model.ClassNameReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
+		return
+	}
+	flag, err := logic.NewClassService().ClassNameCheck(req.Name)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("check class name error: ", zap.Error(err))
+		return
+	} else if flag {
+		code.CommonResp(c, http.StatusOK, code.ClassNameExit, code.EmptyData)
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.RecordNotFound, code.EmptyData)
+	return
+}

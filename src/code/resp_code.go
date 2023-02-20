@@ -13,10 +13,10 @@ const (
 	WrongPassword
 	NotInClass
 	UnmatchedPassword
-	// UnKnowError 未知错误
 	ServerBusy
 	RecordNotFound
 	ChildExit
+	ClassNameExit
 )
 
 //业务逻辑状态信息描述
@@ -31,6 +31,7 @@ var recodeText = map[ResCode]string{
 	ChildExit:         "存在子知识点，请清空后重试",
 	NotInClass:        "学生未加入班级",
 	UnmatchedPassword: "密码错误",
+	ClassNameExit:     "存在",
 }
 
 // StatusText 返回状态码的文本。如果代码为空或未知状态码则返回error

@@ -2,9 +2,10 @@ package model
 
 type BaseStudentInfo struct {
 	Name        string ` json:"name" form:"name" binding:"required" gorm:"column:name"`
+	StudentNo   string ` json:"student_no" form:"student_no" binding:"required" gorm:"column:student_no"`
 	College     string `json:"college" form:"college" binding:"required" gorm:"column:college"`
 	Major       string `json:"major" form:"major" binding:"required" gorm:"column:major"`
-	PhoneNumber string `json:"phone_number" form:"phone_number" binding:"required" gorm:"column:phone_number"`
+	PhoneNumber string `json:"phone_number" form:"phone_number" gorm:"column:phone_number"`
 }
 
 type Student struct {
@@ -23,7 +24,7 @@ type CreateStudentReq struct {
 }
 
 type CreateStudentResp struct {
-	StudentID string `json:"student_id"`
+	StudentID string `json:"student_id" form:"student_id" binding:"required" gorm:"column:student_id"`
 	BaseStudentInfo
 }
 
@@ -50,11 +51,20 @@ type ClassStudentListResp struct {
 }
 
 type EmptyClassStudentReq struct {
-	PageNum  int `form:"page_num" binding:"required"`
-	PageSize int `form:"page_size" binding:"required"`
+	PageNum  int    `form:"page_num" binding:"required"`
+	PageSize int    `form:"page_size" binding:"required"`
+	Content  string `form:"content"`
 }
 
 type DeleteClassStudentReq struct {
 	ClassID   string `form:"class_id" binding:"required"`
+	StudentID string `form:"student_id" binding:"required"`
+}
+
+type SearchStudentReq struct {
+	SearchText string `json:"search_text" form:"search_text" binding:"required"`
+}
+
+type DeleteStudentReq struct {
 	StudentID string `form:"student_id" binding:"required"`
 }

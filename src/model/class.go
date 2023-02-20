@@ -36,3 +36,7 @@ type ClassListReq struct {
 	PageNum  int `form:"page_num" binding:"required"`
 	PageSize int `form:"page_size" binding:"required"`
 }
+
+type ClassNameReq struct {
+	Name string `form:"name" binding:"required" gorm:"column:name"`
+}

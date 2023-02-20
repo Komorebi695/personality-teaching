@@ -29,7 +29,7 @@ func SearchExam(c *gin.Context) {
 	teacherID := c.GetString(utils.TeacherID)
 	res, err := logic.NewExamService().SearchExam(req.Text, teacherID)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("search exam error: ", zap.Error(err))
 		return
 	}
@@ -76,7 +76,7 @@ func UpdateExam(c *gin.Context) {
 	}
 	// 执行更新
 	if err := logic.NewExamService().Update(req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("update exam error: ", zap.Error(err))
 		return
 	}
@@ -95,7 +95,8 @@ func DeleteExam(c *gin.Context) {
 	}
 	// 执行删除
 	if err := logic.NewExamService().Delete(req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("delete exam error：", zap.Error(err))
 		return
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
@@ -117,7 +118,7 @@ func ExamList(c *gin.Context) {
 	// 查询
 	resp, err := logic.NewExamService().List(teacherID, req)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam list error: ", zap.Error(err))
 		return
 	}
@@ -137,7 +138,7 @@ func ExamInfo(c *gin.Context) {
 	// 查询
 	examDetail, err := logic.NewExamService().Details(req.ExamID)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam detail error: ", zap.Error(err))
 		return
 	}
@@ -181,10 +182,31 @@ func SendExam(c *gin.Context) {
 			return
 		}
 		if err := logic.NewExamService().SendClass(req); err != nil {
-			code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+			code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 			logger.L.Error("send exam by class error: ", zap.Error(err))
 			return
 		}
 		code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 	}
+}
+
+// ReleaseStudentList ,获取发布试卷班级的学生
+// Param:
+// exam_id 试卷编号
+// class_id 班级编号
+// Router /teacher/exam/student/list
+func ReleaseStudentList(c *gin.Context) {
+	var req model.ReleaseExamReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return
+	}
+	studentList, err := logic.NewExamService().ReleaseStudentList(req.ClassID.ClassID, req.ExamIDReq.ExamID)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("query release student list error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, studentList)
+	return
 }

@@ -92,11 +92,11 @@ func StudentNotInClass(c *gin.Context) {
 		code.RespList(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData, 0)
 		return
 	}
-	resp, total, err := logic.NewStudentService(c).GetStudentsInClass(model.ClassStudentListReq{
+	resp, total, err := logic.NewStudentService(c).GetStudentsNotInClass(model.ClassStudentListReq{
 		ClassID:  utils.EmptyClassID,
 		PageNum:  req.PageNum,
 		PageSize: req.PageSize,
-	})
+	}, req.Content)
 	if err != nil {
 		code.RespList(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData, 0)
 		logger.L.Error("GetStudentInClass error: ", zap.Error(err))
@@ -169,4 +169,50 @@ func StudentLogin(c *gin.Context) {
 	}
 	c.SetCookie(utils.SessionKey, sessionKey, 0, "", "", false, false)
 	code.CommonResp(c, http.StatusOK, code.Success, studentID)
+}
+
+func SearchStudent(c *gin.Context) {
+	var req model.SearchStudentReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	studentList, err := logic.NewStudentService(c).SearchStudent(req.SearchText)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("search student error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, studentList)
+	return
+}
+
+func DeleteStudent(c *gin.Context) {
+	var req model.DeleteStudentReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+
+	if err := logic.NewStudentService(c).RemoveStudent(req.StudentID); err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("RemoveStudent error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
+}
+
+func UpdateStudent(c *gin.Context) {
+	var req model.CreateStudentResp
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+
+	if err := logic.NewStudentService(c).UpdateStudent(req); err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("Update student info error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, code.EmptyData)
 }
