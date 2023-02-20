@@ -69,3 +69,16 @@ type ExamDetailResp struct {
 type SearchReq struct {
 	Text string `json:"text"`
 }
+
+type ReleaseStudentResp struct {
+	StudentID string `json:"student_id" gorm:"column:student_id"`
+	Name      string `json:"name"  gorm:"column:name"`
+	College   string `json:"college"  gorm:"column:college"`
+	Major     string `json:"major" gorm:"column:major"`
+	Status    string `json:"status" gorm:"column:status"`
+}
+
+type ReleaseExamReq struct {
+	ClassID
+	ExamIDReq
+}

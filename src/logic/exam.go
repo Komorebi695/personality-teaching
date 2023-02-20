@@ -118,3 +118,13 @@ func (ec *ExamService) SendClass(req model.SendClassReq) error {
 	}
 	return mysql.NewExamMysql().SendExamClass(ce)
 }
+
+// ReleaseStudentList ,发布学生列表
+//Param：
+// ClassID：班级编号
+// examID：试卷编号
+//Return value：
+//  学生列表&错误信息
+func (ec *ExamService) ReleaseStudentList(classID string, examID string) ([]model.ReleaseStudentResp, error) {
+	return mysql.NewExamMysql().QueryClassStudent(classID, examID)
+}

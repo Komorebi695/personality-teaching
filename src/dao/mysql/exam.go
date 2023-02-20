@@ -16,9 +16,26 @@ type examFunc interface {
 	SendExamStudent(req model.StudentExam) error
 	SendExamClass(req model.ClassExam) error
 	Query(text string, teacherID string) (model.ExamListResp, error)
+	QueryClassStudent(classID string, examID string) ([]model.ReleaseStudentResp, error)
 }
 
 type ExamMySQL struct{}
+
+func (e ExamMySQL) QueryClassStudent(classID string, examID string) ([]model.ReleaseStudentResp, error) {
+	var studentList []model.ReleaseStudentResp
+	if err := db.Raw("SELECT s.`student_id`,`name`,`college`,`major`,'-1' AS `status` "+
+		"FROM `t_student` s "+
+		"WHERE `class_id` = ? AND s.`student_id` NOT IN (SELECT `student_id` FROM `t_student_exam`  WHERE `exam_id`=?) "+
+		"UNION "+
+		"SELECT se.`student_id`,`name`,`college`,`major`,'1' AS `status` "+
+		"FROM `t_student` s "+
+		"LEFT JOIN `t_student_exam` se "+
+		"ON s.`student_id`=se.`student_id` "+
+		"WHERE `class_id` = ? AND se.`exam_id`=?;", classID, examID, classID, examID).Scan(&studentList).Error; err != nil {
+		return nil, err
+	}
+	return studentList, nil
+}
 
 // Query 模糊查询
 func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, error) {
@@ -152,11 +169,9 @@ func (e ExamMySQL) SendExamClass(ce model.ClassExam) error {
 		build.WriteString(temp)
 		pre = build.String()
 	}
-	sql := fmt.Sprintf("%s%s", pre, ")")
-	fmt.Println(sql)
-
+	sql := fmt.Sprintf("%s%s", pre, ") AND `student_id` NOT IN (SELECT `student_id` FROM `t_student_exam` WHERE `exam_id`=?);")
 	return db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec(sql, ce.ExamID, ce.Comment, ce.StartTime, ce.EndTime, ce.UpdateTime, ce.CreateTime).Error; err != nil {
+		if err := tx.Exec(sql, ce.ExamID, ce.Comment, ce.StartTime, ce.EndTime, ce.UpdateTime, ce.CreateTime, ce.ExamID).Error; err != nil {
 			return err
 		}
 		return nil

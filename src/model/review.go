@@ -3,22 +3,28 @@ package model
 import "time"
 
 type StudentExams struct {
-	ExamID    string  `gorm:"column:exam_id" json:"exam_id"`
-	StudentID string  `gorm:"column:student_id" json:"class_id"`
-	ExamName  string  `gorm:"column:exam_name" json:"exam_name"`                               // 试卷编号
-	Answers   string  `gorm:"column:answers" json:"answers"`                                   // 学生答案
-	Score     float64 `gorm:"score" json:"score"`                                              // 分数
-	Comment   string  `gorm:"column:comment" form:"comment" binding:"required" json:"comment"` // 备注
+	ExamID        string `gorm:"column:exam_id" json:"exam_id"`
+	StudentID     string `gorm:"column:student_id" json:"student_id"`
+	ExamName      string `gorm:"column:exam_name" json:"exam_name"`                               // 试卷编号
+	Answers       string `gorm:"column:answers" json:"answers"`                                   // 学生答案
+	DetailedScore string `gorm:"detailed_score" json:"detailed_score"`                            //试卷题目详细分数
+	TotalScore    string `gorm:"total_score" json:"total_score"`                                  // 总分数
+	Status        int    `gorm:"status" json:"status"`                                            //状态
+	ProblemStatus string `gorm:"problem_status" json:"problem_status"`                            // 题目状态
+	Comment       string `gorm:"column:comment" form:"comment" binding:"required" json:"comment"` // 备注
+	Times         int    `gorm:"times" json:"times"`                                              // 做的次数
 }
 
 type ReviewClass struct {
-	Count int `gorm:"count" json:"count"`
+	ClassID string `gorm:"class_id" json:"class_id"`
 	BaseClassInfo
+	Count int `gorm:"count" json:"count"`
 }
 
 type ReviewStudent struct {
+	StudentID  string    `gorm:"student_id" json:"student_id"`
 	Name       string    `gorm:"name" json:"name"`
-	Score      float64   `gorm:"score" json:"score"`
+	Score      string    `gorm:"score" json:"score"`
 	Status     int       `gorm:"status" json:"status"`
 	UpdateTime time.Time `gorm:"update_time" json:"update_time"`
 }
@@ -29,19 +35,22 @@ type ReviewUpdate struct {
 }
 
 type ReviewUpdateReq struct {
-	ExamID    string  `gorm:"column:exam_id" json:"exam_id"`       // 试卷编号
-	StudentID string  `gorm:"column:student_id" json:"student_id"` //学生编号
-	Answers   string  `gorm:"column:answers" json:"answers"`       // 学生答案
-	Score     float64 `gorm:"score" json:"score"`                  // 分数
-	Status    int     `gorm:"status" json:"status"`                //状态
+	ExamID        string `gorm:"column:exam_id" json:"exam_id"`        // 试卷编号
+	StudentID     string `gorm:"column:student_id" json:"student_id"`  //学生编号
+	Answers       string `gorm:"column:answers" json:"answers"`        // 学生答案
+	DetailedScore string `gorm:"detailed_score" json:"detailed_score"` //试卷题目详细分数
+	TotalScore    string `gorm:"total_score" json:"total_score"`       // 总分数
+	ProblemStatus string `gorm:"problem_status" json:"problem_status"` // 题目状态
+	Status        int    `gorm:"status" json:"status"`                 //状态
+	Times         int    `gorm:"times" json:"times"`                   // 做的次数
 }
 
 type ReviewStudentListReq struct {
-	ClassID string `json:"class_id"`
-	ExamID  string `json:"exam_id"`
+	ClassID string `json:"class_id" form:"class_id"`
+	ExamID  string `json:"exam_id" form:"exam_id"`
 }
 
 type ReviewStudentReq struct {
-	ExamID    string `json:"exam_id"`
-	StudentID string `json:"class_id"`
+	ExamID    string `json:"exam_id" form:"exam_id"`
+	StudentID string `json:"student_id" form:"student_id"`
 }

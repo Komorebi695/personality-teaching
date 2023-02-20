@@ -16,10 +16,13 @@ type studentFunc interface {
 	CreateStudent(req model.CreateStudentReq) (model.CreateStudentResp, error)
 	UpdateClassID(req model.AddStudentToClassReq) (model.AddStudentClassResp, error)
 	GetStudentsInClass(req model.ClassStudentListReq) ([]model.ClassStudentListResp, int, error)
+	GetStudentsNotInClass(req model.ClassStudentListReq, content string) ([]model.ClassStudentListResp, int, error)
 	RemoveStudentClass(studentID string) error
 	CheckStudentClass(studentID string, classID string) (bool, error)
 	CheckStudentPermission(sessionKey string) (string, error)
 	CheckPwd(req model.LoginReq) (string, error)
+	RemoveStudent(studentID string) error
+	UpdateStudent(cs model.CreateStudentResp) error
 }
 
 var _ studentFunc = &StudentService{}
@@ -50,6 +53,10 @@ func (s *StudentService) CreateStudent(req model.CreateStudentReq) (model.Create
 	}, nil
 }
 
+func (s *StudentService) UpdateStudent(cs model.CreateStudentResp) error {
+	return mysql.NewStudentMySQL().UpdateStudent(cs)
+}
+
 func (s *StudentService) UpdateClassID(req model.AddStudentToClassReq) (model.AddStudentClassResp, error) {
 	if err := mysql.NewStudentMySQL().UpdateClassID(req.StudentID, req.ClassID); err != nil {
 		return model.AddStudentClassResp{}, err
@@ -73,8 +80,20 @@ func (s *StudentService) GetStudentsInClass(req model.ClassStudentListReq) ([]mo
 	return students, total, nil
 }
 
+func (s *StudentService) GetStudentsNotInClass(req model.ClassStudentListReq, content string) ([]model.ClassStudentListResp, int, error) {
+	students, total, err := mysql.NewStudentMySQL().QueryStudentsNotInClass(req, content)
+	if err != nil {
+		return []model.ClassStudentListResp{}, 0, err
+	}
+	return students, total, nil
+}
+
 func (s *StudentService) RemoveStudentClass(studentID string) error {
 	return mysql.NewStudentMySQL().UpdateClassID(studentID, utils.EmptyClassID)
+}
+
+func (s *StudentService) RemoveStudent(studentID string) error {
+	return mysql.NewStudentMySQL().DeleteStudent(studentID)
 }
 
 func (s *StudentService) CheckStudentClass(studentID string, classID string) (bool, error) {
@@ -147,6 +166,7 @@ func (s *StudentService) ChangePwd(studentID string, req model.ChangePwdReq) err
 	return nil
 }
 
+// CheckPwd ,检查密码
 func (s *StudentService) CheckPwd(req model.LoginReq) (string, error) {
 	student, err := mysql.NewStudentMySQL().QueryAllByName(req.UserName)
 	if err != nil || student.StudentID == "" {
@@ -157,4 +177,9 @@ func (s *StudentService) CheckPwd(req model.LoginReq) (string, error) {
 		return "", err
 	}
 	return student.StudentID, nil
+}
+
+// SearchStudent ,按照学号或则姓名搜索学生
+func (s *StudentService) SearchStudent(searchText string) ([]model.ClassStudentListResp, error) {
+	return mysql.NewStudentMySQL().QueryStudentLike(searchText)
 }

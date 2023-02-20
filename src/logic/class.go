@@ -46,3 +46,7 @@ func (c *ClassService) ClassInfoList(teacherID string, req model.ClassListReq) (
 func (c *ClassService) ClassInfo(classID string) (model.Class, error) {
 	return mysql.NewClassMysql().QueryClass(classID)
 }
+
+func (c *ClassService) ClassNameCheck(name string) (bool, error) {
+	return mysql.NewClassMysql().CheckClassName(name)
+}

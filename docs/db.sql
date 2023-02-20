@@ -2,7 +2,8 @@
 SQLyog Ultimate v12.08 (64 bit)
 MySQL - 5.7.19 : Database - school_teach
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -24,12 +25,6 @@ CREATE TABLE `t_class` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
-/*Data for the table `t_class` */
-
-insert  into `t_class`(`id`,`class_id`,`name`,`college`,`major`,`is_delete`) values (1,'1','计科01','计科院','计科',0);
-insert  into `t_class`(`id`,`class_id`,`name`,`college`,`major`,`is_delete`) values (2,'31','代角长事十','elit dolor dolore adipisicing enim','eiusmod laboris reprehenderit',0);
-insert  into `t_class`(`id`,`class_id`,`name`,`college`,`major`,`is_delete`) values (3,'82','三活更重音员少','eu do','quis',1);
-
 /*Table structure for table `t_student` */
 
 CREATE TABLE `t_student` (
@@ -43,16 +38,8 @@ CREATE TABLE `t_student` (
   `phone_number` varchar(64) NOT NULL COMMENT '电话号码',
   `is_delete` int(8) NOT NULL COMMENT '是否已删除；0：否；1：是',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_student_id` (`student_id`),
-  UNIQUE KEY `uniq_phone_number` (`phone_number`)
+  UNIQUE KEY `uniq_student_id` (`student_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
-
-/*Data for the table `t_student` */
-
-insert  into `t_student`(`id`,`student_id`,`name`,`password`,`college`,`major`,`class_id`,`phone_number`,`is_delete`) values (1,'202021091195','我去二','123456','计科院','计科','1','111111111',0);
-insert  into `t_student`(`id`,`student_id`,`name`,`password`,`college`,`major`,`class_id`,`phone_number`,`is_delete`) values (2,'22222','号号步市认立','minim cupidatat consectetur quis','minim ut officia occaecat','consequat id proident','1','85',0);
-insert  into `t_student`(`id`,`student_id`,`name`,`password`,`college`,`major`,`class_id`,`phone_number`,`is_delete`) values (3,'77','切记条今始候','ex consectetur Duis','eu aliquip','sunt quis','1','73',0);
-insert  into `t_student`(`id`,`student_id`,`name`,`password`,`college`,`major`,`class_id`,`phone_number`,`is_delete`) values (4,'22','员领则半验领今','ut dolore id','exercitation ut','eiusmod minim','1','86',1);
 
 /*Table structure for table `t_teacher` */
 
@@ -66,13 +53,8 @@ CREATE TABLE `t_teacher` (
   `phone_number` varchar(64) NOT NULL COMMENT '电话号码',
   `is_delete` int(8) NOT NULL COMMENT '是否已删除；0：否；1：是',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_teacher_id` (`teacher_id`),
-  UNIQUE KEY `uniq_phone_number` (`phone_number`)
+  UNIQUE KEY `uniq_teacher_id` (`teacher_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
-/*Data for the table `t_teacher` */
-
-insert  into `t_teacher`(`id`,`teacher_id`,`name`,`password`,`college`,`major`,`phone_number`,`is_delete`) values (1,'74','义进保期','eu ut','计算机科学学院','计科','2222222222',0);
 
 /*Table structure for table `t_teacher_class` */
 

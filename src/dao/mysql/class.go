@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"personality-teaching/src/model"
 
 	"gorm.io/gorm"
@@ -18,6 +19,7 @@ type classFunc interface {
 	QueryClass(classID string) (model.Class, error)
 	QueryClassList(teacherID string, req model.ClassListReq) ([]model.Class, int, error)
 	CheckTeacherClass(teacherID string, classID string) (bool, error)
+	CheckClassName(name string) (bool, error)
 }
 
 type ClassMySQL struct{}
@@ -95,4 +97,16 @@ func (c *ClassMySQL) CheckTeacherClass(teacherID string, classID string) (bool, 
 		return false, err
 	}
 	return !(id == ""), nil
+}
+
+// CheckClassName 有此数据返回true
+func (c *ClassMySQL) CheckClassName(name string) (bool, error) {
+	var classID string
+	name = fmt.Sprintf("%%%s%%", name)
+	if err := db.Raw("select `class_id` from `t_class` where `name` like ?;", name).Scan(&classID).Error; err != nil {
+		return false, err
+	} else if classID == "" {
+		return false, nil
+	}
+	return true, nil
 }

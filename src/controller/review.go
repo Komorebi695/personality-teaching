@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -19,7 +20,7 @@ func ReviewUpdate(c *gin.Context) {
 		return
 	}
 	if err := logic.NewReviewService().UpdateReview(req); err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("update review error: ", zap.Error(err))
 		return
 	}
@@ -32,14 +33,15 @@ func ReviewUpdate(c *gin.Context) {
 // Router /teacher/review/class [get]
 func ReviewClass(c *gin.Context) {
 	var req model.ExamIDReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
+		fmt.Println(err.Error())
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
 
 	classList, err := logic.NewReviewService().QueryReviewClass(req.ExamID)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam class list error: ", zap.Error(err))
 		return
 	}
@@ -53,13 +55,13 @@ func ReviewClass(c *gin.Context) {
 // Router /teacher/review/student/list [get]
 func ReviewStudentList(c *gin.Context) {
 	var req model.ReviewStudentListReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
 	studentList, err := logic.NewReviewService().QueryReviewStudent(req.ClassID, req.ExamID)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam student list error: ", zap.Error(err))
 		return
 	}
@@ -72,13 +74,13 @@ func ReviewStudentList(c *gin.Context) {
 // Router /teacher/review/student [get]
 func ReviewStudent(c *gin.Context) {
 	var req model.ReviewStudentReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
 	studentAnswer, err := logic.NewReviewService().QueryStudentAnswer(req.ExamID, req.StudentID)
 	if err != nil {
-		code.CommonResp(c, http.StatusOK, code.ServerBusy, code.EmptyData)
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query student exam answer error: ", zap.Error(err))
 		return
 	}
