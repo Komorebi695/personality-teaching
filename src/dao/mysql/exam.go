@@ -23,7 +23,7 @@ type ExamMySQL struct{}
 
 func (e ExamMySQL) QueryClassStudent(classID string, examID string) ([]model.ReleaseStudentResp, error) {
 	var studentList []model.ReleaseStudentResp
-	if err := db.Raw("SELECT s.`student_id`,`name`,`college`,`major`,'-1' AS `status` "+
+	if err := Db.Raw("SELECT s.`student_id`,`name`,`college`,`major`,'-1' AS `status` "+
 		"FROM `t_student` s "+
 		"WHERE `class_id` = ? AND s.`student_id` NOT IN (SELECT `student_id` FROM `t_student_exam`  WHERE `exam_id`=?) "+
 		"UNION "+
@@ -42,7 +42,7 @@ func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, err
 	var exams []model.ExamResp
 	examName := "%" + text + "%"
 	// 查询试卷列表
-	if err := db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
+	if err := Db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
 		"from `t_exam` "+
 		"where `create_teacher_id`=? and `exam_name` like ? "+
 		"order by `create_time` "+
@@ -58,7 +58,7 @@ func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, err
 
 // Insert 插入试卷
 func (e ExamMySQL) Insert(exam model.Exam) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("insert into `t_exam`(`exam_id`,`exam_name`,`questions`,`comment`,`create_teacher_id`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
 			exam.ExamID, exam.ExamName, exam.Questions, exam.Comment, exam.CreateTeacherID, exam.UpdateTime, exam.CreateTime).Error; err != nil {
 			return err
@@ -69,7 +69,7 @@ func (e ExamMySQL) Insert(exam model.Exam) error {
 
 // UpdateExam 更新试卷
 func (e ExamMySQL) UpdateExam(exam model.Exam) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("update `t_exam` set `exam_name`=?,`questions`=?,`comment`=?,`update_time`=? where `exam_id`=?",
 			exam.ExamName, exam.Questions, exam.Comment, exam.UpdateTime, exam.ExamID).Error; err != nil {
 			return err
@@ -80,7 +80,7 @@ func (e ExamMySQL) UpdateExam(exam model.Exam) error {
 
 // DeleteExam ,删除试卷
 func (e ExamMySQL) DeleteExam(examID string) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("delete from `t_exam` where `exam_id`=?", examID).Error; err != nil {
 			return err
 		}
@@ -91,7 +91,7 @@ func (e ExamMySQL) DeleteExam(examID string) error {
 // QueryExam ,获取试卷详细消息
 func (e ExamMySQL) QueryExam(examID string) (model.ExamDetailResp, error) {
 	var exam model.ExamDetailResp
-	if err := db.Raw("select `exam_id`,`exam_name`,`questions`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
+	if err := Db.Raw("select `exam_id`,`exam_name`,`questions`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
 		examID).Scan(&exam).Error; err != nil {
 		return model.ExamDetailResp{}, err
 	}
@@ -106,7 +106,7 @@ func (e ExamMySQL) QueryExam(examID string) (model.ExamDetailResp, error) {
 func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) (model.ExamListResp, error) {
 	var exams []model.ExamResp
 	// 查询试卷列表
-	if err := db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
+	if err := Db.Raw("select `exam_id`,`exam_name`,`comment`,`update_time` "+
 		"from `t_exam` "+
 		"where `create_teacher_id`=? "+
 		"order by `create_time` "+
@@ -118,7 +118,7 @@ func (e ExamMySQL) QueryExamList(teacherID string, offset int, pageSize int) (mo
 
 	var total int
 	// 查询试卷总数
-	if err := db.Raw("select count(*) from `t_exam` where `create_teacher_id`=?", teacherID).Scan(&total).Error; err != nil {
+	if err := Db.Raw("select count(*) from `t_exam` where `create_teacher_id`=?", teacherID).Scan(&total).Error; err != nil {
 		return model.ExamListResp{}, err
 	}
 	var examList model.ExamListResp
@@ -145,7 +145,7 @@ func (e ExamMySQL) SendExamStudent(req model.StudentExam) error {
 		build.WriteString(temp)
 		sql = build.String()
 	}
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec(sql).Error; err != nil {
 			return err
 		}
@@ -170,7 +170,7 @@ func (e ExamMySQL) SendExamClass(ce model.ClassExam) error {
 		pre = build.String()
 	}
 	sql := fmt.Sprintf("%s%s", pre, ") AND `student_id` NOT IN (SELECT `student_id` FROM `t_student_exam` WHERE `exam_id`=?);")
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec(sql, ce.ExamID, ce.Comment, ce.StartTime, ce.EndTime, ce.UpdateTime, ce.CreateTime, ce.ExamID).Error; err != nil {
 			return err
 		}

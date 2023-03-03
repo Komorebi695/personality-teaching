@@ -15,7 +15,7 @@ type reviewFunc interface {
 type ReviewMySQL struct{}
 
 func (r ReviewMySQL) UpdateReview(exams model.ReviewUpdate) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("UPDATE `t_student_exam` SET `answers`=?,`detailed_score`=?,`total_score`=?,`problem_status`=?,`status`=?,`update_time`=? WHERE `exam_id`=? AND `student_id`=? AND `times`=?;",
 			exams.Answers, exams.DetailedScore, exams.TotalScore, exams.ProblemStatus, exams.Status, exams.UpdateTime, exams.ExamID, exams.StudentID, exams.Times).Error; err != nil {
 			return err
@@ -26,7 +26,7 @@ func (r ReviewMySQL) UpdateReview(exams model.ReviewUpdate) error {
 
 func (r ReviewMySQL) QueryStudent(examID string, studentID string) (model.StudentExams, error) {
 	var studentExam model.StudentExams
-	if err := db.Raw("SELECT se.`exam_id`,`student_id`,`exam_name`,`answers`,`detailed_score`,`total_score`,`problem_status`,`times`,se.`comment` "+
+	if err := Db.Raw("SELECT se.`exam_id`,`student_id`,`exam_name`,`answers`,`detailed_score`,`total_score`,`problem_status`,`times`,se.`comment` "+
 		"FROM `t_student_exam` se "+
 		"LEFT JOIN `t_exam` e "+
 		"ON se.`exam_id`=e.`exam_id` "+
@@ -42,7 +42,7 @@ func (r ReviewMySQL) QueryStudent(examID string, studentID string) (model.Studen
 
 func (r ReviewMySQL) QueryStudentList(classID string, examID string) ([]model.ReviewStudent, error) {
 	var studentList []model.ReviewStudent
-	if err := db.Raw("SELECT s.`student_id`,s.`name`,`total_score`,`status`,`update_time` FROM `t_student_exam` se LEFT JOIN `t_student` s ON se.`student_id`=s.`student_id` WHERE `class_id`=? AND `exam_id`=? ORDER BY `status`;",
+	if err := Db.Raw("SELECT s.`student_id`,s.`name`,`total_score`,`status`,`update_time` FROM `t_student_exam` se LEFT JOIN `t_student` s ON se.`student_id`=s.`student_id` WHERE `class_id`=? AND `exam_id`=? ORDER BY `status`;",
 		classID, examID).Scan(&studentList).Error; err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (r ReviewMySQL) QueryStudentList(classID string, examID string) ([]model.Re
 
 func (r ReviewMySQL) QueryClass(examID string) ([]model.ReviewClass, error) {
 	var classList []model.ReviewClass
-	if err := db.Raw("SELECT s.`class_id`,c.`name`,c.`college`,c.`major`,COUNT(*) AS `count` "+
+	if err := Db.Raw("SELECT s.`class_id`,c.`name`,c.`college`,c.`major`,COUNT(*) AS `count` "+
 		"\nFROM `t_student_exam` se "+
 		"\nLEFT JOIN `t_student` s "+
 		"\nON se.`student_id`=s.`student_id` "+

@@ -28,6 +28,8 @@ var recodeText = map[ResCode]string{
 	InvalidParam:      "参数错误",
 	ServerBusy:        "服务繁忙",
 	RecordNotFound:    "找不到记录",
+
+
 	ChildExit:         "存在子知识点，请清空后重试",
 	NotInClass:        "学生未加入班级",
 	UnmatchedPassword: "密码错误",

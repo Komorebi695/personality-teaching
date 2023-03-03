@@ -31,7 +31,7 @@ func NewClassMysql() *ClassMySQL {
 }
 
 func (c *ClassMySQL) InsertClass(teacherID string, m model.Class) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("insert into `t_class`(`class_id`,`name`,`college`,`major`) values (?,?,?,?)",
 			m.ClassID, m.Name, m.College, m.Major).Error; err != nil {
 			return err
@@ -46,12 +46,12 @@ func (c *ClassMySQL) InsertClass(teacherID string, m model.Class) error {
 }
 
 func (c *ClassMySQL) UpdateClass(m model.Class) error {
-	return db.Exec("update `t_class` set `name` = ?,`college` = ?,`major` = ? where class_id = ?",
+	return Db.Exec("update `t_class` set `name` = ?,`college` = ?,`major` = ? where class_id = ?",
 		m.Name, m.College, m.Major, m.ClassID).Error
 }
 
 func (c *ClassMySQL) DeleteClass(teacherID string, classID string) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+	return Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("delete from `t_class` where `class_id` = ?", classID).Error; err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ func (c *ClassMySQL) DeleteClass(teacherID string, classID string) error {
 
 func (c *ClassMySQL) QueryClass(classID string) (model.Class, error) {
 	var m model.Class
-	if err := db.Raw("select `class_id`,`name`,`college`,`major` from `t_class` where class_id = ?", classID).Scan(&m).Error; err != nil {
+	if err := Db.Raw("select `class_id`,`name`,`college`,`major` from `t_class` where class_id = ?", classID).Scan(&m).Error; err != nil {
 		return model.Class{}, err
 	}
 	return m, nil
@@ -76,13 +76,13 @@ func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([
 	var total int
 	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
-	err := db.Raw("select `t_class`.`class_id`,`name`,`college`,`major` from `t_class` inner join `t_teacher_class` "+
+	err := Db.Raw("select `t_class`.`class_id`,`name`,`college`,`major` from `t_class` inner join `t_teacher_class` "+
 		"on `t_class`.class_id = `t_teacher_class`.class_id "+
 		"where teacher_id = ? and `is_valid` = ? limit ?,?", teacherID, classValid, offset, count).Scan(&classes).Error
 	if err != nil {
 		return []model.Class{}, 0, err
 	}
-	err = db.Raw("select count(`id`) from `t_teacher_class` where `teacher_id` = ? and `is_valid` = ?", teacherID, classValid).Scan(&total).Error
+	err = Db.Raw("select count(`id`) from `t_teacher_class` where `teacher_id` = ? and `is_valid` = ?", teacherID, classValid).Scan(&total).Error
 	if err != nil {
 		return []model.Class{}, 0, err
 	}
@@ -92,7 +92,7 @@ func (c *ClassMySQL) QueryClassList(teacherID string, req model.ClassListReq) ([
 // CheckTeacherClass 有此数据返回true
 func (c *ClassMySQL) CheckTeacherClass(teacherID string, classID string) (bool, error) {
 	id := ""
-	err := db.Raw("select `id` from `t_teacher_class` where `teacher_id` = ? and `class_id` = ? and `is_valid` = ?", teacherID, classID, classValid).Scan(&id).Error
+	err := Db.Raw("select `id` from `t_teacher_class` where `teacher_id` = ? and `class_id` = ? and `is_valid` = ?", teacherID, classID, classValid).Scan(&id).Error
 	if err != nil {
 		return false, err
 	}
@@ -103,7 +103,7 @@ func (c *ClassMySQL) CheckTeacherClass(teacherID string, classID string) (bool, 
 func (c *ClassMySQL) CheckClassName(name string) (bool, error) {
 	var classID string
 	name = fmt.Sprintf("%%%s%%", name)
-	if err := db.Raw("select `class_id` from `t_class` where `name` like ?;", name).Scan(&classID).Error; err != nil {
+	if err := Db.Raw("select `class_id` from `t_class` where `name` like ?;", name).Scan(&classID).Error; err != nil {
 		return false, err
 	} else if classID == "" {
 		return false, nil

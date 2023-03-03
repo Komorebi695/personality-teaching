@@ -1,10 +1,11 @@
 package main
 
+import "C"
 import (
+	"github.com/gin-gonic/gin"
+	"personality-teaching/src/Cos"
 	"personality-teaching/src/controller"
 	"personality-teaching/src/middle"
-
-	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
@@ -59,6 +60,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/question/detail", controller.QuestionDetail)
 		teacherRouter.POST("/question", controller.QuestionAdd)
 		teacherRouter.PUT("/question", controller.QuestionUpdate)
+		teacherRouter.POST("Cquestion",Cos.QuestionUploadFileToCos)
 		//知识点管理
 		teacherRouter.GET("/point/list", controller.PointList)
 		teacherRouter.GET("/point/list/one_stage", controller.PointOneStageList)
@@ -67,6 +69,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.POST("/point", controller.PointAdd)
 		teacherRouter.PUT("/point", controller.PointUpdate)
 		teacherRouter.PUT("/point/connection", controller.PointConnectionUpdate)
+		teacherRouter.POST("/point/uploadImage",Cos.KnpUploadFileToCos)
 	}
 
 	// 学生登录

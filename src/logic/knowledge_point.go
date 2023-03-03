@@ -159,7 +159,7 @@ func (t *KnowledgePointService) KnowledgePointAdd(c *gin.Context, params *model.
 		KnowledgePointInfo: model.KnowledgePointInfo{
 			Name:    params.Name,
 			Level:   params.Level,
-			Context: params.Context,
+			Context: params.Context, 
 		},
 		CreateUser: params.CreateUser,
 	}

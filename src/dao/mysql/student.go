@@ -28,20 +28,20 @@ func NewStudentMySQL() *StudentMySQL {
 }
 
 func (s *StudentMySQL) InsertStudent(stu model.Student) error {
-	return db.Create(&stu).Error
+	return Db.Create(&stu).Error
 }
 
 func (s *StudentMySQL) DeleteStudent(studentID string) error {
-	return db.Exec("delete from `t_student` where `student_id`=?", studentID).Error
+	return Db.Exec("delete from `t_student` where `student_id`=?", studentID).Error
 }
 
 func (s *StudentMySQL) UpdateClassID(studentID, classID string) error {
-	return db.Exec("update `t_student` set `class_id` = ? where student_id = ?", classID, studentID).Error
+	return Db.Exec("update `t_student` set `class_id` = ? where student_id = ?", classID, studentID).Error
 }
 
 func (s *StudentMySQL) QueryStudent(studentID string) (model.Student, error) {
 	var m model.Student
-	err := db.Raw("select `student_id`,`name`,`student_no`,`password`,`college`,`major`,`class_id`,`phone_number` from `t_student` where `student_id` = ?", studentID).Scan(&m).Error
+	err := Db.Raw("select `student_id`,`name`,`student_no`,`password`,`college`,`major`,`class_id`,`phone_number` from `t_student` where `student_id` = ?", studentID).Scan(&m).Error
 	if err != nil {
 		return model.Student{}, err
 	}
@@ -53,11 +53,11 @@ func (s *StudentMySQL) QueryStudentsInClass(req model.ClassStudentListReq) ([]mo
 	var total int
 	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
-	err := db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id` = ? limit ?,?", req.ClassID, offset, count).Scan(&students).Error
+	err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id` = ? limit ?,?", req.ClassID, offset, count).Scan(&students).Error
 	if err != nil {
 		return []model.ClassStudentListResp{}, 0, err
 	}
-	err = db.Raw("select count(`id`) from `t_student` where `class_id` = ?", req.ClassID).Scan(&total).Error
+	err = Db.Raw("select count(`id`) from `t_student` where `class_id` = ?", req.ClassID).Scan(&total).Error
 	if err != nil {
 		return []model.ClassStudentListResp{}, 0, err
 	}
@@ -70,11 +70,11 @@ func (s *StudentMySQL) QueryStudentsNotInClass(req model.ClassStudentListReq, co
 	offset := (req.PageNum - 1) * req.PageSize
 	count := req.PageSize
 	content = fmt.Sprintf("%%%s%%", content)
-	err := db.Raw("SELECT `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` FROM `t_student` WHERE `class_id` = ? AND `name` LIKE ?  LIMIT ?,?", req.ClassID, content, offset, count).Scan(&students).Error
+	err := Db.Raw("SELECT `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` FROM `t_student` WHERE `class_id` = ? AND `name` LIKE ?  LIMIT ?,?", req.ClassID, content, offset, count).Scan(&students).Error
 	if err != nil {
 		return []model.ClassStudentListResp{}, 0, err
 	}
-	err = db.Raw("select count(`id`) from `t_student` where `class_id` = ? AND `name` LIKE ?;", req.ClassID, content).Scan(&total).Error
+	err = Db.Raw("select count(`id`) from `t_student` where `class_id` = ? AND `name` LIKE ?;", req.ClassID, content).Scan(&total).Error
 	if err != nil {
 		return []model.ClassStudentListResp{}, 0, err
 	}
@@ -84,7 +84,7 @@ func (s *StudentMySQL) QueryStudentsNotInClass(req model.ClassStudentListReq, co
 // CheckStudentClass 检查学生是否在班级中
 func (s *StudentMySQL) CheckStudentClass(studentID string, classID string) (bool, error) {
 	id := -1
-	err := db.Raw("select `id` from `t_student` where `student_id` = ? and `class_id` = ?", studentID, classID).Scan(&id).Error
+	err := Db.Raw("select `id` from `t_student` where `student_id` = ? and `class_id` = ?", studentID, classID).Scan(&id).Error
 	if err != nil {
 		return false, err
 	}
@@ -92,12 +92,12 @@ func (s *StudentMySQL) CheckStudentClass(studentID string, classID string) (bool
 }
 
 func (s *StudentMySQL) UpdatePassWord(studentID string, newPwd string) error {
-	return db.Exec("update `t_student` set `password` = ? where `student_id` = ?", newPwd, studentID).Error
+	return Db.Exec("update `t_student` set `password` = ? where `student_id` = ?", newPwd, studentID).Error
 }
 
 func (s *StudentMySQL) QueryAllByName(name string) (model.Student, error) {
 	var m model.Student
-	err := db.Raw("select `student_id`,`name`,`student_no`,`password`,`college`,`major`,`class_id`,`phone_number` from `t_student` where `name` = ? limit 1", name).Scan(&m).Error
+	err := Db.Raw("select `student_id`,`name`,`student_no`,`password`,`college`,`major`,`class_id`,`phone_number` from `t_student` where `name` = ? limit 1", name).Scan(&m).Error
 	if err != nil {
 		return model.Student{}, err
 	}
@@ -107,12 +107,12 @@ func (s *StudentMySQL) QueryAllByName(name string) (model.Student, error) {
 func (s *StudentMySQL) QueryStudentLike(searchText string) ([]model.ClassStudentListResp, error) {
 	var m []model.ClassStudentListResp
 	searchText = fmt.Sprintf("%%%s%%", searchText)
-	err := db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `name` like ?;", searchText).Scan(&m).Error
+	err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `name` like ?;", searchText).Scan(&m).Error
 	if err != nil {
 		return nil, err
 	}
 	if len(m) == 0 {
-		err := db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `student_no` like ?;", searchText).Scan(&m).Error
+		err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `student_no` like ?;", searchText).Scan(&m).Error
 		if err != nil {
 			return nil, err
 		}
@@ -121,5 +121,5 @@ func (s *StudentMySQL) QueryStudentLike(searchText string) ([]model.ClassStudent
 }
 
 func (s *StudentMySQL) UpdateStudent(cs model.CreateStudentResp) error {
-	return db.Exec("update `t_student` set `name`=?,`student_no`=?,`college`=?,`major`=?,`phone_number`=? where `student_id`=?;", cs.Name, cs.StudentNo, cs.College, cs.Major, cs.PhoneNumber, cs.StudentID).Error
+	return Db.Exec("update `t_student` set `name`=?,`student_no`=?,`college`=?,`major`=?,`phone_number`=? where `student_id`=?;", cs.Name, cs.StudentNo, cs.College, cs.Major, cs.PhoneNumber, cs.StudentID).Error
 }
