@@ -1,6 +1,7 @@
 package model
 
 import (
+	"gorm.io/gorm"
 	"strings"
 	"time"
 )
@@ -18,8 +19,17 @@ type KnowledgePointInfo struct {
 	Context string `json:"context" gorm:"column:context" description:"知识点内容"`
 }
 
+// KnowledgePointImage 知识点图片储存
+type KnowledgePointFile struct {
+	gorm.Model
+	Id     int64  `json:"id" gorm:"primary_key" description:"自增主键"`
+	KnpId  string `json:"knp_id" gorm:"column:knp_id" description:"知识点编号"`
+	CosUrl string `json:"cos_url" gorm:"column:Cos_url" description:"图片返回地址"`
+}
+
 // KnowledgePoint 知识点表
 type KnowledgePoint struct {
+	gorm.Model
 	Id int64 `json:"id" gorm:"primary_key" description:"自增主键"`
 	KnowledgePointBase
 	KnowledgePointInfo
@@ -27,7 +37,6 @@ type KnowledgePoint struct {
 	UpdatedAt  time.Time `json:"update_time" gorm:"column:update_time" description:"修改时间"`
 	CreatedAt  time.Time `json:"create_time" gorm:"column:create_time" description:"创建时间"`
 }
-
 // KnowledgePointDetail 知识点详情表
 type KnowledgePointDetail struct {
 	Info                    *KnowledgePoint            `json:"info" description:"知识点信息"`

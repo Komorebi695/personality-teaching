@@ -38,13 +38,13 @@ func InitConfig() *AppConfig {
 	var config *AppConfig
 	file, err := os.Open("./src/configs/config.yaml")
 	if err != nil {
-		panic(err.Error())
+		panic(any(err.Error()))
 	}
 	// 解析
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		panic(err.Error())
+		panic(any(err.Error()))
 	}
 	return config
 }

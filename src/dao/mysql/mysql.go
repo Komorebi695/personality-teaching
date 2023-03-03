@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"personality-teaching/src/configs"
+	"personality-teaching/src/model"
 	"time"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -14,7 +15,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var db *gorm.DB
+var Db *gorm.DB
 
 func InitMysql(initConfig *configs.AppConfig) (err error) {
 	database := initConfig.DataBase
@@ -36,7 +37,7 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 		database.Host,
 		database.Port,
 		database.Database)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
@@ -44,7 +45,7 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 	}
 
 	// 迁移
-	err = db.AutoMigrate()
+	err = Db.AutoMigrate(&model.KnowledgePointFile{},&model.QuestionFile{})
 	if err != nil {
 		return err
 	}
@@ -52,8 +53,8 @@ func InitMysql(initConfig *configs.AppConfig) (err error) {
 	return err
 }
 func GetGormPool() (*gorm.DB, error) {
-	if db != nil {
-		return db, nil
+	if Db != nil {
+		return Db, nil
 	} else {
 		return nil, errors.New("get pool error")
 	}

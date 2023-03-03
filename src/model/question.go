@@ -37,6 +37,13 @@ type QuestionDetail struct {
 	KnowledgePointList []*KnowledgePoint `json:"knowledge_point_list" description:"知识点列表"`
 }
 
+// QuestionFile 上传图片模型
+type QuestionFile struct {
+	ID      int64  `json:"id" gorm:"primary_key" description:"自增主键"`
+	CosUrl  string `json:"cos_url" description:"题目图片"`
+
+}
+
 // QuestionListInput 题目列表输入
 type QuestionListInput struct {
 	Context  string `json:"context" form:"context" comment:"关键词"`
