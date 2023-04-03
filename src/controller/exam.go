@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"personality-teaching/src/code"
+	"personality-teaching/src/dao/mysql"
 	"personality-teaching/src/logger"
 	"personality-teaching/src/logic"
 	"personality-teaching/src/model"
@@ -15,7 +16,9 @@ import (
 
 // SearchExam ,搜索试卷
 // Param:
-//  text: 搜索文本
+//
+//	text: 搜索文本
+//
 // Router /teacher/exam/search [post]
 func SearchExam(c *gin.Context) {
 	var req model.SearchReq
@@ -38,9 +41,11 @@ func SearchExam(c *gin.Context) {
 
 // AddExam ,新增试卷
 // Param:
-//  exam_name: 试卷名称
-//  questions: 试题
-//  comment: 备注
+//
+//	exam_name: 试卷名称
+//	questions: 试题
+//	comment: 备注
+//
 // Router /teacher/exam [post]
 func AddExam(c *gin.Context) {
 	var req model.ExamAddReq
@@ -63,10 +68,12 @@ func AddExam(c *gin.Context) {
 
 // UpdateExam ,更新试卷内容
 // Param:
-//  exam_id: 试卷编号
-//  exam_name: 试卷名称
-//  questions: 试题
-//  comment: 备注
+//
+//	exam_id: 试卷编号
+//	exam_name: 试卷名称
+//	questions: 试题
+//	comment: 备注
+//
 // Router /teacher/exam [put]
 func UpdateExam(c *gin.Context) {
 	var req model.ExamUpdateReq
@@ -85,7 +92,9 @@ func UpdateExam(c *gin.Context) {
 
 // DeleteExam ,删除试卷
 // Param:
-//  exam_id: 试卷编号
+//
+//	exam_id: 试卷编号
+//
 // Router /teacher/exam [delete]
 func DeleteExam(c *gin.Context) {
 	var req model.ExamDeleteReq
@@ -209,4 +218,26 @@ func ReleaseStudentList(c *gin.Context) {
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, studentList)
 	return
+}
+
+// GetTeacherExamList .获取发布试卷信息
+func GetTeacherExamList(c *gin.Context) {
+	var req model.GetTeacherExamListReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return
+	}
+	ExamId, err := mysql.GetExamIDByStudentID(req.StudentID.StudentID)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("query exam_id error: ", zap.Error(err))
+		return
+	}
+	examDetail, err := logic.NewExamService().Details(ExamId)
+	if err != nil {
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		logger.L.Error("query exam detail error: ", zap.Error(err))
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, examDetail)
 }

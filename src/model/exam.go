@@ -82,3 +82,7 @@ type ReleaseExamReq struct {
 	ClassID
 	ExamIDReq
 }
+
+type GetTeacherExamListReq struct {
+	StudentID
+}

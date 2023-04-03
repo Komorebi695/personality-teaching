@@ -60,7 +60,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/question/detail", controller.QuestionDetail)
 		teacherRouter.POST("/question", controller.QuestionAdd)
 		teacherRouter.PUT("/question", controller.QuestionUpdate)
-		teacherRouter.POST("Cquestion",Cos.QuestionUploadFileToCos)
+		teacherRouter.POST("Cquestion", Cos.QuestionUploadFileToCos)
 		//知识点管理
 		teacherRouter.GET("/point/list", controller.PointList)
 		teacherRouter.GET("/point/list/one_stage", controller.PointOneStageList)
@@ -69,15 +69,22 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.POST("/point", controller.PointAdd)
 		teacherRouter.PUT("/point", controller.PointUpdate)
 		teacherRouter.PUT("/point/connection", controller.PointConnectionUpdate)
-		teacherRouter.POST("/point/uploadImage",Cos.KnpUploadFileToCos)
+		teacherRouter.POST("/point/uploadImage", Cos.KnpUploadFileToCos)
 	}
 
 	// 学生登录
 	studentRouter := router.Group("/student")
 	studentRouter.POST("/login", controller.StudentLogin)
 	studentRouter.Use(middle.VerifyStudent)
-	{
-
+	{ //知识点管理
+		studentRouter.GET("/point/list", controller.PointList)
+		studentRouter.GET("/point/list/one_stage", controller.PointOneStageList)
+		//题目管理
+		studentRouter.GET("/question/list", controller.QuestionList)
+		studentRouter.GET("/question/detail", controller.QuestionDetail)
+		//试卷管理
+		studentRouter.GET("/exam/get", controller.GetTeacherExamList)
+		//studentRouter.GET("/exam/post")
 	}
 	return router
 }

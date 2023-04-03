@@ -11,9 +11,9 @@ var redisDB *redis.Client
 
 func InitRedis(redisConf configs.Redis) error {
 	redisDB = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", redisConf.Addr, redisConf.Port),
-		Password: redisConf.Password, // redis密码，没有则留空
-		DB:       0,                  // 默认数据库，默认是0
+		Addr: fmt.Sprintf("%s:%s", redisConf.Addr, redisConf.Port),
+		//Password: redisConf.Password, // redis密码，没有则留空
+		DB: 0, // 默认数据库，默认是0
 	})
 
 	//检查是否成功连接到了redis服务器

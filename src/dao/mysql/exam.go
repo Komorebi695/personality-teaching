@@ -178,6 +178,31 @@ func (e ExamMySQL) SendExamClass(ce model.ClassExam) error {
 	})
 }
 
+// 定义一个结构体用于映射 t_student_exam 表
+type StudentExam struct {
+	StudentID int
+	ExamID    string
+}
+
+func GetExamIDByStudentID(StudentID string) (string, error) {
+	// 创建一个 StudentExam 结构体变量，用于存储查询结果
+	studentExam := StudentExam{}
+
+	// 执行查询，将结果映射到结构体中
+	result := Db.Table("t_student_exam").Select("exam_id").Where("student_id = ?", StudentID).First(&studentExam)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			// 如果查询结果为空，返回一个自定义错误
+			return string(0), fmt.Errorf("no exam found for student with id %d", StudentID)
+		}
+		// 如果出现其他错误，直接返回该错误
+		return string(0), result.Error
+	}
+
+	// 返回查询结果
+	return studentExam.ExamID, nil
+}
+
 var _ examFunc = &ExamMySQL{}
 
 func NewExamMysql() *ExamMySQL {
