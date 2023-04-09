@@ -14,9 +14,10 @@ func (e Exam) TableName() string {
 
 // BaseExamInfo ,试卷基本信息
 type BaseExamInfo struct {
-	ExamName  string `gorm:"column:exam_name" form:"exam_name" binding:"required" json:"exam_name"` // 试卷名称
-	Questions string `gorm:"column:questions" form:"questions" binding:"required" json:"questions"` // 试题
-	Comment   string `gorm:"column:comment" form:"comment" binding:"required" json:"comment"`       // 备注
+	ExamName   string `gorm:"column:exam_name" form:"exam_name" binding:"required" json:"exam_name"`       // 试卷名称
+	Questions  string `gorm:"column:questions" form:"questions" binding:"required" json:"questions"`       // 试题
+	EveryScore string `gorm:"column:every_score" form:"every_score" binding:"required" json:"every_score"` // 试题对应分值
+	Comment    string `gorm:"column:comment" form:"comment" binding:"required" json:"comment"`             // 备注
 }
 
 // ExamAddReq ,新增试卷请求参数结构
