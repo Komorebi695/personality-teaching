@@ -59,7 +59,7 @@ func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, err
 // Insert 插入试卷
 func (e ExamMySQL) Insert(exam model.Exam) error {
 	return Db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("insert into `t_exam`(`exam_id`,`exam_name`,`questions`,`comment`,`create_teacher_id`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
+		if err := tx.Exec("insert into `t_exam`(`exam_id`,`exam_name`,`questions`,`every_score`,`comment`,`create_teacher_id`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
 			exam.ExamID, exam.ExamName, exam.Questions, exam.Comment, exam.CreateTeacherID, exam.UpdateTime, exam.CreateTime).Error; err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func (e ExamMySQL) Insert(exam model.Exam) error {
 // UpdateExam 更新试卷
 func (e ExamMySQL) UpdateExam(exam model.Exam) error {
 	return Db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("update `t_exam` set `exam_name`=?,`questions`=?,`comment`=?,`update_time`=? where `exam_id`=?",
+		if err := tx.Exec("update `t_exam` set `exam_name`=?,`questions`=?,`every_score`=?,`comment`=?,`update_time`=? where `exam_id`=?",
 			exam.ExamName, exam.Questions, exam.Comment, exam.UpdateTime, exam.ExamID).Error; err != nil {
 			return err
 		}
@@ -91,7 +91,7 @@ func (e ExamMySQL) DeleteExam(examID string) error {
 // QueryExam ,获取试卷详细消息
 func (e ExamMySQL) QueryExam(examID string) (model.ExamDetailResp, error) {
 	var exam model.ExamDetailResp
-	if err := Db.Raw("select `exam_id`,`exam_name`,`questions`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
+	if err := Db.Raw("select `exam_id`,`exam_name`,`questions`,`every_score`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
 		examID).Scan(&exam).Error; err != nil {
 		return model.ExamDetailResp{}, err
 	}
