@@ -82,3 +82,18 @@ type ReleaseExamReq struct {
 	ClassID
 	ExamIDReq
 }
+
+type GetTeacherExamListReq struct {
+	StudentID
+}
+
+type PostStudentExamAnswerReq struct {
+	StudentID
+	ExamIDReq
+	Answer string `json:"answers" gorm:"column:answers"`
+}
+
+type StudentAllExams struct {
+	ID int
+	ExamDetailResp
+}
