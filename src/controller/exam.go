@@ -223,21 +223,44 @@ func ReleaseStudentList(c *gin.Context) {
 // GetTeacherExamList .获取发布试卷信息
 func GetTeacherExamList(c *gin.Context) {
 	var req model.GetTeacherExamListReq
+	studentallexams := make(map[string]model.StudentAllExams)
 	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
-	ExamId, err := mysql.GetExamIDByStudentID(req.StudentID.StudentID)
+	ExamIds, err := mysql.GetExamIDByStudentID(req.StudentID.StudentID)
 	if err != nil {
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		logger.L.Error("query exam_id error: ", zap.Error(err))
 		return
 	}
-	examDetail, err := logic.NewExamService().Details(ExamId)
-	if err != nil {
-		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
-		logger.L.Error("query exam detail error: ", zap.Error(err))
+
+	for _ ,examid := range ExamIds{
+		examDetail, err := logic.NewExamService().Details(examid.ExamID)
+		if err != nil {
+			code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+			logger.L.Error("query exam detail error: ", zap.Error(err))
+			return
+		}
+		studentallexam := model.StudentAllExams{
+			ID: examid.ID,
+			ExamDetailResp: examDetail,
+		}
+		studentallexams[examid.ExamID] = studentallexam
+	}
+
+	code.CommonResp(c, http.StatusOK, code.Success, studentallexams)
+}
+
+// PostStudentExamAnswer 学生添加答案
+func PostStudentExamAnswer(c *gin.Context){
+	var req model.PostStudentExamAnswerReq
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
-	code.CommonResp(c, http.StatusOK, code.Success, examDetail)
+	addAnswer := mysql.PostStudentExamAnswer(req.StudentID.StudentID,req.ExamIDReq.ExamID,req.Answer)
+
+	code.CommonResp(c,http.StatusOK, code.Success,addAnswer)
+
 }

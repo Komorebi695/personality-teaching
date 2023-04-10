@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"personality-teaching/src/model"
@@ -178,30 +179,65 @@ func (e ExamMySQL) SendExamClass(ce model.ClassExam) error {
 	})
 }
 
-// 定义一个结构体用于映射 t_student_exam 表
+// StudentExam 定义一个结构体用于映射 t_student_exam 表
 type StudentExam struct {
-	StudentID int
+	StudentID string
 	ExamID    string
+	ID        int
 }
 
-func GetExamIDByStudentID(StudentID string) (string, error) {
+// GetExamIDByStudentID 获取学生对应试卷信息
+func GetExamIDByStudentID(StudentID string) ([]StudentExam, error) {
 	// 创建一个 StudentExam 结构体变量，用于存储查询结果
-	studentExam := StudentExam{}
+	var studentExam []StudentExam
 
 	// 执行查询，将结果映射到结构体中
-	result := Db.Table("t_student_exam").Select("exam_id").Where("student_id = ?", StudentID).First(&studentExam)
+	result := Db.Table("t_student_exam").Where("student_id = ?", StudentID).Find(&studentExam)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			// 如果查询结果为空，返回一个自定义错误
-			return string(0), fmt.Errorf("no exam found for student with id %d", StudentID)
+			return nil, fmt.Errorf("no exam found for student with id %d", StudentID)
 		}
 		// 如果出现其他错误，直接返回该错误
-		return string(0), result.Error
+		return nil, result.Error
 	}
 
 	// 返回查询结果
-	return studentExam.ExamID, nil
+	return studentExam, nil
 }
+
+
+type StudentAnswer struct {
+	StudentID string `gorm:"column:student_id" json:"student_id"`
+	ExamID string    `gorm:"column:exam_id" json:"exam_id"`
+	Answer string	`gorm:"column:answers" json:"answer"`
+}
+
+// PostStudentExamAnswer 学生提交答案
+func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
+	var studentAnswer StudentAnswer
+	result := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).First(&studentAnswer)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// 如果记录不存在，返回错误信息
+			return fmt.Errorf("StudentExam record not found for examID=%d and studentID=%d", ExamID, StudentID)
+		} else {
+			// 如果发生其他错误，返回错误信息
+			return fmt.Errorf("Database error: %s", result.Error)
+		}
+	}
+	result = Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("answers", Answer)
+	if result.Error != nil {
+		return fmt.Errorf("Database error: %s", result.Error)
+	}
+	// 如果发生错误，返回错误信息
+	StatusResult := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("status",0)
+	if StatusResult.Error != nil{
+		return fmt.Errorf("试卷状态发生错误: %s", result.Error)
+	}
+	return nil
+}
+
 
 var _ examFunc = &ExamMySQL{}
 

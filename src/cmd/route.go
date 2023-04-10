@@ -1,6 +1,5 @@
 package main
 
-import "C"
 import (
 	"github.com/gin-gonic/gin"
 	"personality-teaching/src/Cos"
@@ -84,7 +83,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		studentRouter.GET("/question/detail", controller.QuestionDetail)
 		//试卷管理
 		studentRouter.GET("/exam/get", controller.GetTeacherExamList)
-		//studentRouter.GET("/exam/post")
+		studentRouter.PUT("/exam/upload",controller.PostStudentExamAnswer)
+
 	}
 	return router
 }
