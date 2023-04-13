@@ -123,3 +123,11 @@ func (s *StudentMySQL) QueryStudentLike(searchText string) ([]model.ClassStudent
 func (s *StudentMySQL) UpdateStudent(cs model.CreateStudentResp) error {
 	return Db.Exec("update `t_student` set `name`=?,`student_no`=?,`college`=?,`major`=?,`phone_number`=? where `student_id`=?;", cs.Name, cs.StudentNo, cs.College, cs.Major, cs.PhoneNumber, cs.StudentID).Error
 }
+
+func (s *StudentMySQL) QueryStudentInStuQu(studentID string) (stu []model.StudentQuestion, err error) {
+	err = Db.Raw("select knp_id, allscore, score,answer from t_student_question q LEFT JOIN t_knowledge_point_question knp ON q.question_id = knp.question_id where student_id = ?", studentID).Scan(&stu).Error
+	if err != nil {
+		return nil, err
+	}
+	return stu, nil
+}

@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"personality-teaching/src/logger"
+	"personality-teaching/src/model"
 	"strings"
 	"time"
 
@@ -141,4 +142,27 @@ func Obj2Json(s interface{}) (string, error) {
 		return "", err
 	}
 	return string(marshal), nil
+}
+
+func StuScoreAverage(stu []model.StudentQuestion) map[string]float32 {
+	if len(stu) == 0 {
+		return nil
+	}
+	div := make(map[string]float32, len(stu))
+	dived := make(map[string]float32, len(stu))
+	//根据知识点 求 每个知识点编号的成绩均值，以表示知识点的掌握情况。
+	for i := range stu {
+		_, ok := dived[stu[i].KnpID]
+		if ok {
+			dived[stu[i].KnpID] += stu[i].Score / stu[i].AllScore
+			div[stu[i].KnpID] += 1
+		} else {
+			dived[stu[i].KnpID] = stu[i].Score / stu[i].AllScore
+			div[stu[i].KnpID] = 1
+		}
+	}
+	for k, _ := range dived {
+		dived[k] /= div[k]
+	}
+	return dived
 }
