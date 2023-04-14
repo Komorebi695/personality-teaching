@@ -15,6 +15,17 @@ type Student struct {
 	BaseStudentInfo
 }
 
+type StudentQuestion struct {
+	KnpID    string  `gorm:"column:knp_id"`
+	AllScore float32 `gorm:"column:allscore"`
+	Score    float32 `gorm:"column:score"`
+	Answer   string  `gorm:"column:answer"`
+}
+
+type SearchStudentIDResp struct {
+	StudentID string `json:"student_id" form:"student_id" binding:"required" gorm:"column:student_id"`
+}
+
 func (s Student) TableName() string {
 	return "t_student"
 }

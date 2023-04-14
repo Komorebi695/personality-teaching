@@ -143,3 +143,15 @@ func (t *TeacherService) ChangePwd(teacherID string, req model.ChangePwdReq) err
 	code.CommonResp(t.CTX, http.StatusOK, code.Success, code.EmptyData)
 	return nil
 }
+
+func (t *TeacherService) SearchStudent(studentId string) (map[string]float32, error) {
+	//得到学生ID，查询t_student_question表，以ID搜索表，按照作业编号分类。
+	stu, err := mysql.NewStudentMySQL().QueryStudentInStuQu(studentId)
+	//stu中包含知识点编号,题目编号,分数和答案。
+	if err != nil {
+		return nil, err
+	}
+	//计算掌握程度
+	resp := utils.StuScoreAverage(stu)
+	return resp, nil
+}
