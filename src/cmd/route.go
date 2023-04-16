@@ -81,7 +81,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		//题目管理
 		studentRouter.GET("/question/list", controller.QuestionList)
 		studentRouter.GET("/question/detail", controller.QuestionDetail)
-
 		//试卷管理
 		studentRouter.GET("/exam/get", controller.GetTeacherExamList)
 		studentRouter.PUT("/exam/upload", controller.PostStudentExamAnswer)
