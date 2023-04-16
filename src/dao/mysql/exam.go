@@ -206,14 +206,15 @@ func GetExamIDByStudentID(StudentID string) ([]StudentExam, error) {
 	return studentExam, nil
 }
 
+
 type StudentAnswer struct {
 	StudentID string `gorm:"column:student_id" json:"student_id"`
-	ExamID    string `gorm:"column:exam_id" json:"exam_id"`
-	Answer    string `gorm:"column:answers" json:"answer"`
+	ExamID string    `gorm:"column:exam_id" json:"exam_id"`
+	Answer string	`gorm:"column:answers" json:"answer"`
 }
 
 // PostStudentExamAnswer 学生提交答案
-func PostStudentExamAnswer(StudentID string, ExamID string, Answer string) error {
+func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
 	var studentAnswer StudentAnswer
 	result := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).First(&studentAnswer)
 	if result.Error != nil {
@@ -225,32 +226,18 @@ func PostStudentExamAnswer(StudentID string, ExamID string, Answer string) error
 			return fmt.Errorf("Database error: %s", result.Error)
 		}
 	}
-	result = Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).Update("answers", Answer)
+	result = Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("answers", Answer)
 	if result.Error != nil {
 		return fmt.Errorf("Database error: %s", result.Error)
 	}
 	// 如果发生错误，返回错误信息
-	StatusResult := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).Update("status", 0)
-	if StatusResult.Error != nil {
+	StatusResult := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("status",0)
+	if StatusResult.Error != nil{
 		return fmt.Errorf("试卷状态发生错误: %s", result.Error)
 	}
 	return nil
 }
 
-type StudentAnswerReview struct {
-	StudentID string `gorm:"column:student_id" json:"student_id"`
-	ExamID    string `gorm:"column:exam_id" json:"exam_id"`
-	Status    string `gorm:"column:status" json:"status"`
-	Answers   string `gorm:"column:answers" json:"answers"`
-}
-
-func StudentExamReview(StudentID string, ExamID string, Status string) ([]StudentAnswerReview, error) {
-	var studentAnswer []StudentAnswerReview
-	if err := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ? AND status = ?", ExamID, StudentID, Status).Find(&studentAnswer).Error; err != nil {
-		return studentAnswer, nil
-	}
-	return studentAnswer, nil
-}
 
 var _ examFunc = &ExamMySQL{}
 
