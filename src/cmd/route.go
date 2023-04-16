@@ -71,7 +71,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.POST("/point/uploadImage", Cos.KnpUploadFileToCos)
 	}
 
-	// 学生登录
+	// 学生登录 123
 	studentRouter := router.Group("/student")
 	studentRouter.POST("/login", controller.StudentLogin)
 	studentRouter.Use(middle.VerifyStudent)
