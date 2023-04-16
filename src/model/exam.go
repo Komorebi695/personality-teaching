@@ -98,3 +98,9 @@ type StudentAllExams struct {
 	ID int
 	ExamDetailResp
 }
+
+type StudentReviewExams struct {
+	StudentID
+	ExamIDReq
+	Status string `json:"status" gorm:"column:status" form:"status"`
+}

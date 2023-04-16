@@ -235,7 +235,7 @@ func GetTeacherExamList(c *gin.Context) {
 		return
 	}
 
-	for _ ,examid := range ExamIds{
+	for _, examid := range ExamIds {
 		examDetail, err := logic.NewExamService().Details(examid.ExamID)
 		if err != nil {
 			code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
@@ -243,7 +243,7 @@ func GetTeacherExamList(c *gin.Context) {
 			return
 		}
 		studentallexam := model.StudentAllExams{
-			ID: examid.ID,
+			ID:             examid.ID,
 			ExamDetailResp: examDetail,
 		}
 		studentallexams[examid.ExamID] = studentallexam
@@ -253,14 +253,30 @@ func GetTeacherExamList(c *gin.Context) {
 }
 
 // PostStudentExamAnswer 学生添加答案
-func PostStudentExamAnswer(c *gin.Context){
+func PostStudentExamAnswer(c *gin.Context) {
 	var req model.PostStudentExamAnswerReq
 	if err := c.ShouldBind(&req); err != nil {
 		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
 		return
 	}
-	addAnswer := mysql.PostStudentExamAnswer(req.StudentID.StudentID,req.ExamIDReq.ExamID,req.Answer)
+	addAnswer := mysql.PostStudentExamAnswer(req.StudentID.StudentID, req.ExamIDReq.ExamID, req.Answer)
 
-	code.CommonResp(c,http.StatusOK, code.Success,addAnswer)
+	code.CommonResp(c, http.StatusOK, code.Success, addAnswer)
 
+}
+
+// ReviewStudentAnswer 回显学生答案
+func ReviewStudentAnswer(c *gin.Context) {
+	var req model.StudentReviewExams
+	if err := c.ShouldBind(&req); err != nil {
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return
+	}
+	b := req.Status
+	if b == "0" {
+		getAnswers, _ := mysql.StudentExamReview(req.StudentID.StudentID, req.ExamID, req.Status)
+		code.CommonResp(c, http.StatusOK, code.Success, getAnswers)
+	} else {
+		return
+	}
 }

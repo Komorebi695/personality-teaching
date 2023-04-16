@@ -75,7 +75,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/analyse/student", controller.TeacherSearchStudentID)
 	}
 
-	// 学生登录
+	// 学生登录 123
 	studentRouter := router.Group("/student")
 	studentRouter.POST("/login", controller.StudentLogin)
 	studentRouter.Use(middle.VerifyStudent)
@@ -88,6 +88,9 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		//试卷管理
 		studentRouter.GET("/exam/get", controller.GetTeacherExamList)
 		studentRouter.PUT("/exam/upload", controller.PostStudentExamAnswer)
+
+		//提交答案回显
+		studentRouter.GET("/exam/review", controller.ReviewStudentAnswer)
 
 	}
 	return router
