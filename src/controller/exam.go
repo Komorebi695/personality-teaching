@@ -264,3 +264,20 @@ func PostStudentExamAnswer(c *gin.Context){
 	code.CommonResp(c,http.StatusOK, code.Success,addAnswer)
 
 }
+
+
+// ReviewStudentAnswer 回显学生答案
+func ReviewStudentAnswer(c *gin.Context){
+	var req model.StudentReviewExams
+	if err:= c.ShouldBind(&req);err != nil{
+		code.CommonResp(c, http.StatusOK, code.InvalidParam, code.EmptyData)
+		return
+	}
+	b := req.Status
+	if b == "0"{
+		getAnswers,_ := mysql.StudentExamReview(req.StudentID.StudentID,req.ExamID,req.Status)
+		code.CommonResp(c,http.StatusOK,code.Success,getAnswers)
+	}else{
+		return
+	}
+}

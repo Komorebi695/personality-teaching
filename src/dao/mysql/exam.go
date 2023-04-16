@@ -18,6 +18,7 @@ type examFunc interface {
 	SendExamClass(req model.ClassExam) error
 	Query(text string, teacherID string) (model.ExamListResp, error)
 	QueryClassStudent(classID string, examID string) ([]model.ReleaseStudentResp, error)
+
 }
 
 type ExamMySQL struct{}
@@ -237,6 +238,24 @@ func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
 	}
 	return nil
 }
+
+type StudentAnswerReview struct {
+	StudentID string `gorm:"column:student_id" json:"student_id"`
+	ExamID string    `gorm:"column:exam_id" json:"exam_id"`
+	Status string `gorm:"column:status" json:"status"`
+	Answers string `gorm:"column:answers" json:"answers"`
+}
+
+
+func StudentExamReview(StudentID string,ExamID string,Status string) ([]StudentAnswerReview, error){
+	var studentAnswer []StudentAnswerReview
+	if err := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ? AND status = ?", ExamID, StudentID,Status).Find(&studentAnswer).Error;
+	 err != nil{
+		return studentAnswer, nil
+	}
+	return studentAnswer,nil
+}
+
 
 
 var _ examFunc = &ExamMySQL{}
