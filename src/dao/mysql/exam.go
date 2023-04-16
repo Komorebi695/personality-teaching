@@ -238,6 +238,20 @@ func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
 	return nil
 }
 
+type StudentAnswerReview struct {
+	StudentID string `gorm:"column:student_id" json:"student_id"`
+	ExamID string    `gorm:"column:exam_id" json:"exam_id"`
+	Status string `gorm:"column:status" json:"status"`
+	Answer string	`gorm:"column:answers" json:"answer"`
+}
+
+func ReviewStudentAnswer(StudentID string,ExamID string,Status string)([]StudentAnswerReview,error){
+	var studentAnswer []StudentAnswerReview
+	if err := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ? AND status = ?", ExamID, StudentID, Status).Find(&studentAnswer).Error; err != nil {
+		return nil, err
+	}
+	return studentAnswer, nil
+}
 
 var _ examFunc = &ExamMySQL{}
 

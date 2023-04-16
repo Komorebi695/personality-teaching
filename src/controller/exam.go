@@ -274,7 +274,7 @@ func ReviewStudentAnswer(c *gin.Context) {
 	}
 	b := req.Status
 	if b == "0" {
-		getAnswers, _ := mysql.StudentExamReview(req.StudentID.StudentID, req.ExamID, req.Status)
+		getAnswers, _ := mysql.ReviewStudentAnswer(req.StudentID.StudentID, req.ExamID, req.Status)
 		code.CommonResp(c, http.StatusOK, code.Success, getAnswers)
 	} else {
 		return
