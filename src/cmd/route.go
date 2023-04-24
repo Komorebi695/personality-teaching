@@ -38,6 +38,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/student/search", controller.SearchStudent)
 		teacherRouter.DELETE("/student", controller.DeleteStudent)
 		teacherRouter.PUT("/student", controller.UpdateStudent)
+		// 返回cos临时密匙
+		teacherRouter.GET("/key", controller.GetKeyValue)
 
 		// 试卷管理
 		teacherRouter.POST("/exam", controller.AddExam)
@@ -75,7 +77,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.GET("/analyse/student", controller.TeacherSearchStudentID)
 	}
 
-	// 学生登录 123
+	// 学生登录
 	studentRouter := router.Group("/student")
 	studentRouter.POST("/login", controller.StudentLogin)
 	studentRouter.Use(middle.VerifyStudent)
@@ -88,7 +90,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		//试卷管理
 		studentRouter.GET("/exam/get", controller.GetTeacherExamList)
 		studentRouter.PUT("/exam/upload", controller.PostStudentExamAnswer)
-
 		//提交答案回显
 		studentRouter.GET("/exam/review", controller.ReviewStudentAnswer)
 

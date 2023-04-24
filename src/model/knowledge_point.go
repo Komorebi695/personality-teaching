@@ -18,7 +18,7 @@ type KnowledgePointInfo struct {
 	Context string `json:"context" gorm:"column:context" description:"知识点内容"`
 }
 
-// KnowledgePointImage 知识点图片储存
+// KnowledgePointFile 知识点图片储存
 type KnowledgePointFile struct {
 	Id     int64  `json:"id" gorm:"primary_key;AUTO_INCREMENT" description:"自增主键"`
 	CosUrl string `json:"cos_url" gorm:"column:Cos_url" description:"图片返回地址"`

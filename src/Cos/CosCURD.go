@@ -117,3 +117,7 @@ func QuestionUploadFileToCos(c *gin.Context) {
 		"result": result.Error,
 	})
 }
+
+func GetCosKey(c *gin.Context) {
+
+}

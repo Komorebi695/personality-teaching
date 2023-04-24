@@ -68,7 +68,8 @@ func TeacherInfo(c *gin.Context) {
 	code.CommonResp(c, http.StatusOK, code.Success, resp)
 }
 
-// 根据学号查询学生作业掌握情况。
+// 根据学号查询学生作业掌握情况
+
 func TeacherSearchStudentID(c *gin.Context) {
 	studentresp := model.SearchStudentIDResp{}
 	if err := c.ShouldBind(&studentresp); err != nil {

@@ -83,7 +83,7 @@ func QuestionDelete(c *gin.Context) {
 // @ID /teacher/question
 // @Accept  json
 // @Produce  json
-// @Param body body model.QuestionAddInput true "body"
+// @Param body model.QuestionAddInput true "body"
 // @Success 200 {object} code.RespMsg{data=string} "success"
 // @Router /teacher/question [post]
 func QuestionAdd(c *gin.Context) {
