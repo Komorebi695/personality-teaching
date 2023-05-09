@@ -60,7 +60,7 @@ func (e ExamMySQL) Query(text string, teacherID string) (model.ExamListResp, err
 // Insert 插入试卷
 func (e ExamMySQL) Insert(exam model.Exam) error {
 	return Db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("insert into `t_exam`(`exam_id`,`exam_name`,`questions`,`every_score`,`comment`,`create_teacher_id`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
+		if err := tx.Exec("insert into `t_exam`(`exam_id`,`exam_name`,`questions`,`comment`,`create_teacher_id`,`update_time`,`create_time`) values(?,?,?,?,?,?,?)",
 			exam.ExamID, exam.ExamName, exam.Questions, exam.Comment, exam.CreateTeacherID, exam.UpdateTime, exam.CreateTime).Error; err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (e ExamMySQL) Insert(exam model.Exam) error {
 // UpdateExam 更新试卷
 func (e ExamMySQL) UpdateExam(exam model.Exam) error {
 	return Db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("update `t_exam` set `exam_name`=?,`questions`=?,`every_score`=?,`comment`=?,`update_time`=? where `exam_id`=?",
+		if err := tx.Exec("update `t_exam` set `exam_name`=?,`questions`=?,`comment`=?,`update_time`=? where `exam_id`=?",
 			exam.ExamName, exam.Questions, exam.Comment, exam.UpdateTime, exam.ExamID).Error; err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (e ExamMySQL) DeleteExam(examID string) error {
 // QueryExam ,获取试卷详细消息
 func (e ExamMySQL) QueryExam(examID string) (model.ExamDetailResp, error) {
 	var exam model.ExamDetailResp
-	if err := Db.Raw("select `exam_id`,`exam_name`,`questions`,`every_score`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
+	if err := Db.Raw("select `exam_id`,`exam_name`,`questions`,`comment`,`update_time` from `t_exam` where `exam_id`=?",
 		examID).Scan(&exam).Error; err != nil {
 		return model.ExamDetailResp{}, err
 	}
@@ -206,15 +206,14 @@ func GetExamIDByStudentID(StudentID string) ([]StudentExam, error) {
 	return studentExam, nil
 }
 
-
 type StudentAnswer struct {
 	StudentID string `gorm:"column:student_id" json:"student_id"`
-	ExamID string    `gorm:"column:exam_id" json:"exam_id"`
-	Answer string	`gorm:"column:answers" json:"answer"`
+	ExamID    string `gorm:"column:exam_id" json:"exam_id"`
+	Answer    string `gorm:"column:answers" json:"answer"`
 }
 
 // PostStudentExamAnswer 学生提交答案
-func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
+func PostStudentExamAnswer(StudentID string, ExamID string, Answer string) error {
 	var studentAnswer StudentAnswer
 	result := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).First(&studentAnswer)
 	if result.Error != nil {
@@ -226,18 +225,17 @@ func PostStudentExamAnswer(StudentID string,ExamID string,Answer string)error{
 			return fmt.Errorf("Database error: %s", result.Error)
 		}
 	}
-	result = Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("answers", Answer)
+	result = Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).Update("answers", Answer)
 	if result.Error != nil {
 		return fmt.Errorf("Database error: %s", result.Error)
 	}
 	// 如果发生错误，返回错误信息
-	StatusResult := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID,StudentID).Update("status",0)
-	if StatusResult.Error != nil{
+	StatusResult := Db.Table("t_student_exam").Where("exam_id = ? AND student_id = ?", ExamID, StudentID).Update("status", 0)
+	if StatusResult.Error != nil {
 		return fmt.Errorf("试卷状态发生错误: %s", result.Error)
 	}
 	return nil
 }
-
 
 var _ examFunc = &ExamMySQL{}
 

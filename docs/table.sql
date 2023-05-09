@@ -41,7 +41,6 @@ CREATE TABLE `t_exam`
     `exam_id`           varchar(64)  NOT NULL COMMENT '试卷编号',
     `exam_name`         varchar(128) NOT NULL COMMENT '试卷名称',
     `questions`         text         NOT NULL COMMENT '题⽬, 序列化字符串',
-    `every_score`       varchar(1024)  DEFAULT NULL COMMENT '试卷题目对应的分值',
     `comment`           varchar(255) NOT NULL COMMENT '备注',
     `create_teacher_id` varchar(64)  NOT NULL COMMENT '创建教师编号',
     `update_time`       datetime     NOT NULL COMMENT '修改时间',
