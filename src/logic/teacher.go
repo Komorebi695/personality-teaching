@@ -101,7 +101,7 @@ func (*TeacherService) GetTeacherInfo(teacherID string) (model.TeacherInfoResp, 
 	}, nil
 }
 
-func (t *TeacherService) ChangePwd(teacherID string, req model.ChangePwdReq) error {
+func (t *TeacherService)ChangePwd(teacherID string, req model.ChangePwdReq) error {
 	teacher, err := mysql.NewTeacherMysql().QueryAllByID(teacherID)
 	if err != nil {
 		code.CommonResp(t.CTX, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)

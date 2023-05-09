@@ -39,7 +39,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.DELETE("/student", controller.DeleteStudent)
 		teacherRouter.PUT("/student", controller.UpdateStudent)
 		// 返回cos临时密匙
-		teacherRouter.GET("/key", controller.GetKeyValue)
+		//teacherRouter.GET("/key", controller.GetKeyValue)
 
 		// 试卷管理
 		teacherRouter.POST("/exam", controller.AddExam)
