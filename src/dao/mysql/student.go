@@ -131,3 +131,19 @@ func (s *StudentMySQL) QueryStudentInStuQu(studentID string) (stu []model.Studen
 	}
 	return stu, nil
 }
+
+func (s *StudentMySQL) QueryAllKnp() (knp []model.Studentknp, err error) {
+	err = Db.Raw("SELECT knp_id,name,parent_knp_id,level FROM t_knowledge_point").Scan(&knp).Error
+	if err != nil {
+		return nil, err
+	}
+	return knp, nil
+}
+
+func (s *StudentMySQL) QueryteacherClass(teacherID string) (class []model.StudentClass, err error) {
+	err = Db.Raw("select s.class_id, s.student_id,c.name from t_student s LEFT JOIN t_teacher_class t ON t.class_id = s.class_id LEFT JOIN t_class c ON c.class_id = s.class_id where teacher_id = ? and is_valid = 1", teacherID).Scan(&class).Error
+	if err != nil {
+		return nil, err
+	}
+	return class, nil
+}

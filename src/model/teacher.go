@@ -36,3 +36,7 @@ type ChangePwdReq struct {
 	NewPassword string `binding:"required" form:"new_pwd"`
 	OldPassword string `binding:"required" form:"old_pwd"`
 }
+
+type TeacherIDResp struct {
+	TeacherID string `json:"teacher_id" form:"teacher_id" binding:"required" gorm:"column:teacher_id"`
+}

@@ -69,7 +69,7 @@ func TeacherInfo(c *gin.Context) {
 }
 
 // 根据学号查询学生作业掌握情况。
-func TeacherSearchStudentID(c *gin.Context) {
+func TeacherAnalyseStudentID(c *gin.Context) {
 	studentresp := model.SearchStudentIDResp{}
 	if err := c.ShouldBind(&studentresp); err != nil {
 		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
@@ -79,6 +79,22 @@ func TeacherSearchStudentID(c *gin.Context) {
 	resp, err := logic.NewTeacherService(c).SearchStudent(studentID)
 	if err != nil {
 		logger.L.Error("TeacherSearchStudentID error: ", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, resp)
+}
+
+func TeacherAnalyseClass(c *gin.Context) {
+	teacherresp := model.TeacherIDResp{}
+	if err := c.ShouldBind(&teacherresp); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	teacherID := teacherresp.TeacherID
+	resp, err := logic.NewTeacherService(c).SearchClass(teacherID)
+	if err != nil {
+		logger.L.Error("TeacherAnalyseClass error: ", zap.Error(err))
 		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
 		return
 	}

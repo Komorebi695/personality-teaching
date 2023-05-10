@@ -144,9 +144,9 @@ func Obj2Json(s interface{}) (string, error) {
 	return string(marshal), nil
 }
 
-func StuScoreAverage(stu []model.StudentQuestion) map[string]float32 {
+func StuScoreAverage(knp []model.Studentknp, stu []model.StudentQuestion) {
 	if len(stu) == 0 {
-		return nil
+		return
 	}
 	div := make(map[string]float32, len(stu))
 	dived := make(map[string]float32, len(stu))
@@ -164,5 +164,24 @@ func StuScoreAverage(stu []model.StudentQuestion) map[string]float32 {
 	for k, _ := range dived {
 		dived[k] /= div[k]
 	}
-	return dived
+	for k, _ := range knp {
+		vis := knp[k].KnpID
+		knp[k].Knplevel = dived[vis]
+	}
+}
+
+func AddClassStudent(stu []model.Studentknp, knp []model.Studentknp, n int, classname string) {
+	//将stu里的每个知识点得分加到knp中求均值。
+	for i := range stu {
+		for j := range knp {
+			if knp[j].KnpID == stu[i].KnpID {
+				if n == 1 { //表示以前数据没有这个班级，执行新增操作。
+					knp[j].Class_id[classname] = stu[i].Knplevel
+				} else {
+					value := knp[j].Class_id[classname]
+					knp[j].Class_id[classname] = value + (stu[i].Knplevel-value)/float32(n)
+				}
+			}
+		}
+	}
 }
