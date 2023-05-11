@@ -12,12 +12,11 @@ import (
 	"syscall"
 )
 
-
 func main() {
 	// 初始化配置文件
 	config := configs.InitConfig()
 	if config == nil {
-		panic (any("配置文件加载错误!"))
+		panic(any("配置文件加载错误!"))
 	}
 
 	// 创建数据库连接
@@ -25,11 +24,9 @@ func main() {
 		panic(any("MySQL init error: " + err.Error()))
 	}
 
-
 	if err := redis.InitRedis(config.Redis); err != nil {
 		panic(any("Redis init error: " + err.Error()))
 	}
-
 
 	//初始化日志
 	logger.InitLogger()

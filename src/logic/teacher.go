@@ -2,6 +2,7 @@ package logic
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"personality-teaching/src/code"
 	"personality-teaching/src/dao/mysql"
@@ -144,14 +145,55 @@ func (t *TeacherService) ChangePwd(teacherID string, req model.ChangePwdReq) err
 	return nil
 }
 
-func (t *TeacherService) SearchStudent(studentId string) (map[string]float32, error) {
-	//得到学生ID，查询t_student_question表，以ID搜索表，按照作业编号分类。
+func (t *TeacherService) SearchStudent(studentId string) ([]model.Studentknp, error) {
 	stu, err := mysql.NewStudentMySQL().QueryStudentInStuQu(studentId)
+	if err != nil {
+		return nil, err
+	}
+	knp, err := mysql.NewStudentMySQL().QueryAllKnp()
 	//stu中包含知识点编号,题目编号,分数和答案。
 	if err != nil {
 		return nil, err
 	}
 	//计算掌握程度
-	resp := utils.StuScoreAverage(stu)
-	return resp, nil
+	utils.StuScoreAverage(knp, stu)
+	return knp, nil
+}
+
+func (t *TeacherService) SearchClass(teacherId string) ([]model.Studentknp, error) {
+	//得到老师ID，查询多表联查，以ID搜索表，得到所有班级的所有学生。
+	knp, err := mysql.NewStudentMySQL().QueryAllKnp()
+	if err != nil {
+		return nil, err
+	}
+	//初始化knp的Class_id字段
+	for k := range knp {
+		knp[k].Class_id = make(map[string]float32)
+	}
+
+	stu, err := mysql.NewStudentMySQL().QueryteacherClass(teacherId)
+	if err != nil {
+		return nil, err
+	}
+
+	//统计班级学生数量
+	ClassStudentNumber := make(map[string]int)
+
+	//循环班级编号，单个查询班级号。
+	for k := range stu {
+		//遍历所有学生
+		stu_temp, err := t.SearchStudent(stu[k].StudentID)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Print(stu_temp)
+		_, ok := ClassStudentNumber[stu[k].ClassID]
+		if ok {
+			ClassStudentNumber[stu[k].ClassID]++
+		} else {
+			ClassStudentNumber[stu[k].ClassID] = 1
+		}
+		utils.AddClassStudent(stu_temp, knp, ClassStudentNumber[stu[k].ClassID], stu[k].Classname)
+	}
+	return knp, nil
 }

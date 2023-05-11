@@ -22,6 +22,21 @@ type StudentQuestion struct {
 	Answer   string  `gorm:"column:answer"`
 }
 
+type Studentknp struct {
+	KnpID       string             `gorm:"column:knp_id"`
+	KnpName     string             `gorm:"column:name"`
+	ParentKnpId string             `gorm:"column:parent_knp_id"`
+	Level       string             `gorm:"column:level"`
+	Knplevel    float32            `json:"Knplevel"`
+	Class_id    map[string]float32 `json:"Class_id"`
+}
+
+type StudentClass struct {
+	ClassID   string `gorm:"column:class_id"`
+	StudentID string `gorm:"column:student_id"`
+	Classname string `gorm:"column:name"`
+}
+
 type SearchStudentIDResp struct {
 	StudentID string `json:"student_id" form:"student_id" binding:"required" gorm:"column:student_id"`
 }

@@ -72,7 +72,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		teacherRouter.POST("/point/uploadImage", Cos.KnpUploadFileToCos)
 
 		//学情分析
-		teacherRouter.GET("/analyse/student", controller.TeacherSearchStudentID)
+		teacherRouter.GET("/analyse/student", controller.TeacherAnalyseStudentID)
+		teacherRouter.GET("/analyse/class", controller.TeacherAnalyseClass)
 	}
 
 	// 学生登录 123
