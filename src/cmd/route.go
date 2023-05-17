@@ -74,6 +74,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		//学情分析
 		teacherRouter.GET("/analyse/student", controller.TeacherAnalyseStudentID)
 		teacherRouter.GET("/analyse/class", controller.TeacherAnalyseClass)
+		teacherRouter.GET("/analyse/AllStudent", controller.TeacherAnalyseAllStudent)
 	}
 
 	// 学生登录 123

@@ -29,12 +29,18 @@ type Studentknp struct {
 	Level       string             `gorm:"column:level"`
 	Knplevel    float32            `json:"Knplevel"`
 	Class_id    map[string]float32 `json:"Class_id"`
+	Studentname map[string]float32 `json:"Studentname"`
 }
 
 type StudentClass struct {
 	ClassID   string `gorm:"column:class_id"`
 	StudentID string `gorm:"column:student_id"`
 	Classname string `gorm:"column:name"`
+}
+
+type StudentIDandName struct {
+	StudentID   string `gorm:"column:student_id"`
+	StudentName string `gorm:"column:name"`
 }
 
 type SearchStudentIDResp struct {

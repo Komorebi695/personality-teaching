@@ -40,3 +40,7 @@ type ChangePwdReq struct {
 type TeacherIDResp struct {
 	TeacherID string `json:"teacher_id" form:"teacher_id" binding:"required" gorm:"column:teacher_id"`
 }
+
+type TeacherIDClassnameResp struct {
+	ClassID string `json:"class_id" form:"class_id" binding:"required" gorm:"column:class_id"`
+}

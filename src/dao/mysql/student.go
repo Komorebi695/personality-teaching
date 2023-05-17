@@ -147,3 +147,11 @@ func (s *StudentMySQL) QueryteacherClass(teacherID string) (class []model.Studen
 	}
 	return class, nil
 }
+
+func (s *StudentMySQL) Queryteacherstudent(ClassID string) (stu []model.StudentIDandName, err error) {
+	err = Db.Raw("select student_id,`name` from t_student WHERE class_id = ?", ClassID).Scan(&stu).Error
+	if err != nil {
+		return nil, err
+	}
+	return stu, nil
+}

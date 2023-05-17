@@ -170,7 +170,7 @@ func StuScoreAverage(knp []model.Studentknp, stu []model.StudentQuestion) {
 	}
 }
 
-func AddClassStudent(stu []model.Studentknp, knp []model.Studentknp, n int, classname string) {
+func AddClass(stu []model.Studentknp, knp []model.Studentknp, n int, classname string) {
 	//将stu里的每个知识点得分加到knp中求均值。
 	for i := range stu {
 		for j := range knp {
@@ -181,6 +181,17 @@ func AddClassStudent(stu []model.Studentknp, knp []model.Studentknp, n int, clas
 					value := knp[j].Class_id[classname]
 					knp[j].Class_id[classname] = value + (stu[i].Knplevel-value)/float32(n)
 				}
+			}
+		}
+	}
+}
+
+func AddStudent(stu []model.Studentknp, knp []model.Studentknp, studentname string) {
+	//将stu的各个知识点掌握情况并入knp中。
+	for i := range stu {
+		for j := range knp {
+			if knp[j].KnpID == stu[i].KnpID {
+				knp[i].Studentname[studentname] = stu[i].Knplevel
 			}
 		}
 	}
