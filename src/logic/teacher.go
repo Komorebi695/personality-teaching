@@ -193,7 +193,35 @@ func (t *TeacherService) SearchClass(teacherId string) ([]model.Studentknp, erro
 		} else {
 			ClassStudentNumber[stu[k].ClassID] = 1
 		}
-		utils.AddClassStudent(stu_temp, knp, ClassStudentNumber[stu[k].ClassID], stu[k].Classname)
+		utils.AddClass(stu_temp, knp, ClassStudentNumber[stu[k].ClassID], stu[k].Classname)
+	}
+	return knp, nil
+}
+
+func (t *TeacherService) SearchClassAllstudent(ClassID string) ([]model.Studentknp, error) {
+	//用老师ID和班级名称查表，得到所有学生的ID和名称。
+	//再用学生ID循环调用SearchStudent()查询每一个学生成绩。
+	//最后再做合并，并入knp里。
+	knp, err := mysql.NewStudentMySQL().QueryAllKnp()
+	if err != nil {
+		return nil, err
+	}
+	//初始化knp的studentname字段
+	for k := range knp {
+		knp[k].Studentname = make(map[string]float32)
+	}
+	//得到学生列表
+	stu, err := mysql.NewStudentMySQL().Queryteacherstudent(ClassID)
+	if err != nil {
+		return nil, err
+	}
+	for k := range stu {
+		//遍历所有学生
+		stu_temp, err := t.SearchStudent(stu[k].StudentID)
+		if err != nil {
+			return nil, err
+		}
+		utils.AddStudent(stu_temp, knp, stu[k].StudentName)
 	}
 	return knp, nil
 }

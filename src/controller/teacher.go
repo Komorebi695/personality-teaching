@@ -100,3 +100,19 @@ func TeacherAnalyseClass(c *gin.Context) {
 	}
 	code.CommonResp(c, http.StatusOK, code.Success, resp)
 }
+
+func TeacherAnalyseAllStudent(c *gin.Context) {
+	teacherresp := model.TeacherIDClassnameResp{}
+	if err := c.ShouldBind(&teacherresp); err != nil {
+		code.CommonResp(c, http.StatusBadRequest, code.InvalidParam, code.EmptyData)
+		return
+	}
+	classID := teacherresp.ClassID
+	resp, err := logic.NewTeacherService(c).SearchClassAllstudent(classID)
+	if err != nil {
+		logger.L.Error("TeacherAnalyseClass error: ", zap.Error(err))
+		code.CommonResp(c, http.StatusInternalServerError, code.ServerBusy, code.EmptyData)
+		return
+	}
+	code.CommonResp(c, http.StatusOK, code.Success, resp)
+}
