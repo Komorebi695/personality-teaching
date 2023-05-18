@@ -107,12 +107,12 @@ func (s *StudentMySQL) QueryAllByName(name string) (model.Student, error) {
 func (s *StudentMySQL) QueryStudentLike(searchText string) ([]model.ClassStudentListResp, error) {
 	var m []model.ClassStudentListResp
 	searchText = fmt.Sprintf("%%%s%%", searchText)
-	err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `name` like ?;", searchText).Scan(&m).Error
+	err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where   `name` like ?;", searchText).Scan(&m).Error
 	if err != nil {
 		return nil, err
 	}
 	if len(m) == 0 {
-		err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where `class_id`='0' and `student_no` like ?;", searchText).Scan(&m).Error
+		err := Db.Raw("select `student_id`,`name`,`student_no`,`college`,`major`,`phone_number` from `t_student` where  `student_no` like ?;", searchText).Scan(&m).Error
 		if err != nil {
 			return nil, err
 		}
